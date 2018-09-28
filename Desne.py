@@ -29,7 +29,9 @@ mountain = game.image.load("mountain.png")
 grass = game.image.load("grass.png")
 snow = game.image.load("snow.png")
 sand = game.image.load("desert.png")
+tree = game.image.load("tree.png")
 mouse = game.image.load("mouse.png")
+test = game.image.load("test.png")
 bar = game.image.load("bar.png")
 titleimg = game.image.load("titleimg.png")
 button = game.image.load("button.png")
@@ -49,6 +51,14 @@ quest2 = game.image.load("quest2.png")
 arrow1 = game.image.load("arrow1.png")
 arrow2 = game.image.load("arrow2.png")
 
+
+###Numbers
+num11 = game.image.load("num11.png")
+num12 = game.image.load("num12.png")
+num101 = game.image.load("num101.png")
+num102 = game.image.load("num102.png")
+num51 = game.image.load("num51.png")
+num52 = game.image.load("num52.png")
 class gen():
 
     def allTiles():
@@ -104,9 +114,8 @@ class gen():
             landCoords.remove(i)
             seaCoords.add(i)
         return landCoords,seaCoords
+    def mountain(mountainCoords,landCoords,seaCoords,allCoords):
 
-
-    def mountain(landCoords,seaCoords,allCoords,mountainCoords):
             coord = random.sample(landCoords, 1)
             a = (coord[0])[0]
             b = (coord[0])[1]
@@ -133,9 +142,9 @@ class gen():
                 b = originaly
 
             return landCoords,seaCoords,allCoords,mountainCoords
-    def snowgen(landCoords):
-        snowCoords = set()
-        nom = random.randint(5,6)*16#7 10
+    def snowgen(snowCoords,landCoords):
+
+        nom = random.randint(7,8)*16#7 10
         y = nom
         x = 640-16
         firsttime = True
@@ -193,22 +202,33 @@ class gen():
 
 
         return snowCoords
-    def sandgen(landCoords,desertCoords):
+    def sandtreegen(desertCoords,landCoords,isDesert):
+
+
+        if isDesert == True:
+            amounts = [2000,1900,1800,1700,1600,1500,3000]
+            amount = random.choice(amounts)
+            possiblesizesx = random.randint(5,12)
+            possiblesizesy = random.randint(1,2)
+        else:
+            amount = random.randint(30,50)
+            possiblesizesx = random.randint(1,1)
+            possiblesizesy = random.randint(1,1)
         coord = random.sample(landCoords, 1)
         x = (coord[0])[0]
         y = (coord[0])[1]
-        possiblesizesx = random.randint(5,12)
-        possiblesizesy = random.randint(1,2)
+
         tries = 0
-        while y not in range(16*22,416):
-            coord = random.sample(landCoords, 1)
-            x = (coord[0])[0]
-            y = (coord[0])[1]
-            possiblesizesx = random.randint(9,19)
-            possiblesizesy = random.randint(1,2)
-            tries += 1
-            if tries == 200:
-                return desertCoords
+        if isDesert == True:
+            while y not in range(16*22,416):
+                coord = random.sample(landCoords, 1)
+                x = (coord[0])[0]
+                y = (coord[0])[1]
+                possiblesizesx = random.randint(9,19)
+                possiblesizesy = random.randint(1,2)
+                tries += 1
+                if tries == 200:
+                    return desertCoords
         a = x
         b = y
         originaly = b
@@ -221,7 +241,7 @@ class gen():
             a-=16
             b = originaly
 
-        for i in range(3000):
+        for i in range(amount):
             tile = (random.sample(desertCoords, 1))[0]
             if random.randint(1,2) == 1:
                 if random.randint(1,2) == 1:
@@ -246,8 +266,12 @@ class gen():
     def finalgen():
         allCoords = set(gen.allTiles())
         landCoords = set()
+        snowCoords = set()
         mountainCoords = set()
         desertCoords = set()
+        treeCoords = set()
+        mountainOffset = {}
+        treeOffset = {}
 
 
         ### Generate Land Squares
@@ -261,36 +285,56 @@ class gen():
         for i in range(int(chanceamount)):
             landCoords,seaCoords = gen.realism(seaCoords,landCoords)
         ###Generate Mountains
-        for i in range(4):
-            landCoords,seaCoords,allCoords,mountainCoords = gen.mountain(landCoords,seaCoords,allCoords,mountainCoords)
-        snowCoords = gen.snowgen(landCoords)
-        for i in range(2):
-            desertCoords = gen.sandgen(landCoords,desertCoords)
+        #    for i in range(random.randint(3,6)):
+        for i in range(random.randint(5,8)):
+            landCoords,seaCoords,allCoords,mountainCoords = gen.mountain(mountainCoords,landCoords,seaCoords,allCoords)
+        ###Generate Snow
+        snowCoords = gen.snowgen(snowCoords,landCoords)
+        ###Generate Desert
+        if random.randint(1,5) != 5:
+            for i in range(random.randint(1,2)):
+                desertCoords = gen.sandtreegen(desertCoords,landCoords,True)
+
+
 
         grassCoords = landCoords-seaCoords-snowCoords-desertCoords
+
+        for i in range(random.randint(5,9)):
+            treeCoords = (gen.sandtreegen(treeCoords,grassCoords,False))-mountainCoords
+        ### Creat Grass
+
         tempCoords = set()
+
+
         for tile in grassCoords:
             if ((tile[0]+16,tile[1])) in desertCoords and ((tile[0]-16,tile[1])) in desertCoords and ((tile[0],tile[1]+16)) in desertCoords and ((tile[0],tile[1]-16)) in desertCoords:
                 tempCoords.add(tile)
                 desertCoords.add(tile)
-        for i in tempCoords:
-            grassCoords.remove(i)
+        for tile in tempCoords:
+            grassCoords.remove(tile)
 
-        posSpawnCoords = landCoords
+        for tile in mountainCoords:
+            mountainOffset[tile] = random.randint(0,4)
+        for tile in treeCoords:
+            treeOffset[tile] = random.randint(0,8)
+
+        posSpawnCoords = set((list(landCoords))[:])
         posCoastCoords = set()
         for i in posSpawnCoords:
             if ((i[0]-16,i[1])) in seaCoords or ((i[0]+16,i[1])) in seaCoords or ((i[0],i[1]-16)) in seaCoords or ((i[0],i[1]+16)) in seaCoords:
                 posCoastCoords.add(i)
 
-        return landCoords,seaCoords,allCoords,mountainCoords,snowCoords,grassCoords,desertCoords,posCoastCoords,posSpawnCoords
+        return landCoords,seaCoords,allCoords,mountainCoords,snowCoords,grassCoords,desertCoords,treeCoords,posCoastCoords,posSpawnCoords,mountainOffset,treeOffset
 
 class societygen():
 
     def spawning(posSpawnCoords,colorcodes):
-        spawntile = (random.sample((landCoords), 1))
-        if spawntile[0] not in posSpawnCoords:
-            spawntile[0] = (random.sample((landCoords), 1))
-        posSpawnCoords.remove(spawntile[0])
+        spawntile = random.choice(list(posSpawnCoords))
+
+        while spawntile not in posSpawnCoords:
+            spawntile = random.choice(list(posSpawnCoords))
+        if year == 0:
+            posSpawnCoords.remove(spawntile)
         color = (random.choice(colorcodes))#150
         colorcodes.remove(color)
         char = open("SocietyCharacteristics.txt","r")
@@ -347,20 +391,23 @@ class societygen():
         name = part1+part2
         f.close()
         name = name[0].upper()+name[1:]
-
-        governmenttype = "Chieftan"
+        if year == 0:
+            governmenttype = "Chieftan"
+        else:
+            governmenttype = "Provisional"
 
         currency = 0
 
         military = 10 #K
 
-        citzensatisfaction = 75 #percent
+        citzensatisfaction = random.randint(60,90) #percent
 
-        datapack = [spawntile,color,societycharacteristics,name,governmenttype,currency,military,citzensatisfaction]
+        datapack = [[spawntile],color,societycharacteristics,name,governmenttype,currency,military,citzensatisfaction,spawntile]
         return datapack,posSpawnCoords,colorcodes
 
     def expand(datapack,posSpawnCoords,seaCoords):
         allTiles = datapack[0]
+
         if allTiles:
             curTile = random.choice(allTiles)
         else:
@@ -374,60 +421,30 @@ class societygen():
             for i in range(8):
                 xplus = 0
                 yplus = 0
-                if mynum == 1:
+                if mynum == 1 or mynum == 5 or mynum == 6:
                     xplus = -16
-                elif mynum == 2:
+                if mynum == 2 or mynum == 7 or mynum == 8:
                     xplus = 16
-                elif mynum == 3:
+                if mynum == 3 or mynum == 5 or mynum == 7:
                     yplus = -16
-                elif mynum == 4:
+                if mynum == 4 or mynum == 8 or mynum == 6:
                     yplus = 16
+
                 if mynum <= 4:
+
                     if ((curTile[0]+xplus), curTile[1]+yplus) in posSpawnCoords:
-
                         curTile = ((curTile[0]+xplus,curTile[1]+yplus))
-
-                        ###
-                        allTiles.append(curTile)
-                        newdatapack = [allTiles,datapack[1],datapack[2],datapack[3],datapack[4],datapack[5],datapack[6],datapack[7]]
-                        return newdatapack, posSpawnCoords
+                        datapack[0].append(curTile)
+                        return datapack, posSpawnCoords
                     else:
                         mynums.remove(mynum)
 
-                elif mynum == 5:
-                    if ((curTile[0]-16), curTile[1]) in seaCoords and ((curTile[0]), curTile[1]-16) in seaCoords and ((curTile[0]-16), curTile[1]-16) in posSpawnCoords:
-                        curTile = ((curTile[0]-16,curTile[1]-16))
-                        allTiles.append(curTile)
-                        newdatapack = [allTiles,datapack[1],datapack[2],datapack[3],datapack[4],datapack[5],datapack[6],datapack[7]]
-                    #    posSpawnCoords.add(curTile)
-                        return newdatapack, posSpawnCoords
-                    else:
-                        mynums.remove(mynum)
-                elif mynum == 6:
-                    if ((curTile[0]-16), curTile[1]) in seaCoords and ((curTile[0]), curTile[1]+16) in seaCoords and ((curTile[0]-16), curTile[1]+16) in posSpawnCoords:
-                        curTile = ((curTile[0]-16,curTile[1]+16))
-                        allTiles.append(curTile)
-                        newdatapack = [allTiles,datapack[1],datapack[2],datapack[3],datapack[4],datapack[5],datapack[6],datapack[7]]
-                    #    posSpawnCoords.add(curTile)
-                        return newdatapack, posSpawnCoords
-                    else:
-                        mynums.remove(mynum)
-                elif mynum == 7:
-                    if ((curTile[0]+16), curTile[1]) in seaCoords and ((curTile[0]), curTile[1]-16) in seaCoords and ((curTile[0]+16), curTile[1]-16) in posSpawnCoords:
-                        curTile = ((curTile[0]+16,curTile[1]-16))
-                        allTiles.append(curTile)
-                        newdatapack = [allTiles,datapack[1],datapack[2],datapack[3],datapack[4],datapack[5],datapack[6],datapack[7]]
-                    #    posSpawnCoords.add(curTile)
-                        return newdatapack, posSpawnCoords
-                    else:
-                        mynums.remove(mynum)
-                elif mynum == 8:
-                    if ((curTile[0]+16), curTile[1]) in seaCoords and ((curTile[0]), curTile[1]+16) in seaCoords and ((curTile[0]+16), curTile[1]+16) in posSpawnCoords:
-                        curTile = ((curTile[0]+16,curTile[1]+16))
-                        allTiles.append(curTile)
-                        newdatapack = [allTiles,datapack[1],datapack[2],datapack[3],datapack[4],datapack[5],datapack[6],datapack[7]]
-                    #    posSpawnCoords.add(curTile)
-                        return newdatapack, posSpawnCoords
+                elif mynum <= 8:
+
+                    if ((curTile[0]+xplus), curTile[1]) in seaCoords and ((curTile[0]), curTile[1]+yplus) in seaCoords and ((curTile[0]+xplus), curTile[1]+yplus) in posSpawnCoords:
+                        curTile = ((curTile[0]+xplus,curTile[1]+yplus))
+                        datapack[0].append(curTile)
+                        return datapack, posSpawnCoords
                     else:
                         mynums.remove(mynum)
                 if mynums:
@@ -451,8 +468,7 @@ class societygen():
                 curTile = (random.sample((posSpawnCoords), 1))[0]
 
                 if ((curTile[0]-16,curTile[1])) in seaCoords or ((curTile[0]+16,curTile[1])) in seaCoords or ((curTile[0],curTile[1]-16)) in seaCoords or ((curTile[0],curTile[1]+16)) in seaCoords:
-                    allTiles.append(curTile)
-                    datapack = [allTiles,datapack[1],datapack[2],datapack[3],datapack[4],datapack[5],datapack[6],datapack[7]]
+                    datapack[0].append(curTile)
                     return datapack,posSpawnCoords
                 else:
                     tempTile.remove(curTile)
@@ -473,14 +489,26 @@ class sidebar():
         win.blit(bar1,((640,0)))
         bar2 = game.transform.rotate(bar, 90)
         win.blit(bar2,((640,320)))
-    def icons():
+    def icons(turnamount):
         win.blit(treeicon,(672,576))
         win.blit(bothicon,(720,576))
         win.blit(politicalicon,(768,576))
+        if turnamount!=1:
+            win.blit(num11,(672,464))
+        else:
+            win.blit(num12,(672,464))
 
-        win.blit(earth1,(672,576-128))
-        win.blit(quest1,(720,576-128))
-        win.blit(mail1,(768,576-128))
+        if turnamount!= 5:
+
+            win.blit(num51,(720,464))
+        else:
+            win.blit(num52,(720,464))
+        if turnamount!=10:
+            win.blit(num101,(768,464))
+        else:
+            win.blit(num102,(768,464))
+
+
         #print(arrow2.get_rect(top=576,left=768))
 
         if earth1.get_rect(top=576,left=672).collidepoint(game.mouse.get_pos()):
@@ -495,12 +523,12 @@ class sidebar():
         if arrow1.get_rect(top=512,left=688).collidepoint(game.mouse.get_pos()):
             win.blit(arrow2,(688,512))
 
-        if earth1.get_rect(top=576-128,left=672).collidepoint(game.mouse.get_pos()):
-            win.blit(earth2,(672,576-128))
-        if earth1.get_rect(top=576-128,left=720).collidepoint(game.mouse.get_pos()):
-            win.blit(quest2,(720,576-128))
-        if earth1.get_rect(top=576-128,left=768).collidepoint(game.mouse.get_pos()):
-            win.blit(mail2,(768,576-128))
+        if earth1.get_rect(top=464,left=672).collidepoint(game.mouse.get_pos()):
+            win.blit(num12,(672,464))
+        if earth1.get_rect(top=464,left=720).collidepoint(game.mouse.get_pos()):
+            win.blit(num52,(720,464))
+        if earth1.get_rect(top=464,left=768).collidepoint(game.mouse.get_pos()):
+            win.blit(num102,(768,464))
 
 class other():
     def mousemovement():
@@ -527,8 +555,33 @@ class other():
             xy = treb.render(( "X:      Y: ")   , True, (0, 0, 0))
             win.blit(xy,((0,640-16)))
             game.mouse.set_visible(True)
+    def findarea(Coords):
+        ranTile = random.choice(list(Coords))
+        area = {(ranTile)}
+        temp = set()
+        for i in range(  len(Coords)  ):
+            for tile in area:
+                for num in range(8):
+                    xplus= 0
+                    yplus = 0
+                    if num == 1 or num == 5 or num == 6:
+                        xplus = -16
+                    if num == 2 or num == 7 or num == 8:
+                        xplus = 16
+                    if num == 3 or num == 5 or num == 7:
+                        yplus = -16
+                    if num == 4 or num == 8 or num == 6:
+                        yplus = 16
 
-
+                    if ((tile[0]+xplus,tile[1]+yplus)) in Coords and ((tile[0]+xplus,tile[1]+yplus)) not in area:
+                        temp.add(((tile[0]+xplus,tile[1]+yplus)))
+                    elif ((tile[0]+xplus,tile[1]+yplus)) in Coords and ((tile[0]+xplus,tile[1]+yplus)) not in area:
+                        temp.add(((tile[0]+xplus,tile[1]+yplus)))
+                    else:
+                        pass
+            for tile in temp:
+                area.add(tile)
+        return area
 
 
 
@@ -548,11 +601,11 @@ class other():
         else:
             return possibleTurns
 
-landCoords,seaCoords,allCoords,mountainCoords,snowCoords,grassCoords,desertCoords,posCoastCoords,posSpawnCoords = gen.finalgen()
+landCoords,seaCoords,allCoords,mountainCoords,snowCoords,grassCoords,desertCoords,treeCoords,posCoastCoords,posSpawnCoords,mountainOffset,treeOffset = gen.finalgen()
 
 myalpha = 180
 
-colorcodes = [(0,255,255),(255,0,255),(0,255,0),(255,182,34),(253,179,241),(205,255,0),(161,114,255)]
+colorcodes = [(0,255,255),(255,0,255),(0,255,0),(255,182,34),(253,179,241),(205,255,0),(161,114,255),(173,255,47),(144,238,144), (64,224,208),(127,255,212),(216,191,216),(95,158,160),]
 
 bigpack = list()
 for i in range(random.randint(3,7)):
@@ -577,6 +630,7 @@ titleGameState = True
 treb50 = game.font.SysFont("Trebuchet MS",100)
 treb20 = game.font.SysFont("Trebuchet MS",17)
 
+area = set()
 
 while True:
 
@@ -627,14 +681,14 @@ while True:
 
         game.display.flip()
 
-
+    turnamount = 1
     while worldGameState == True:
 
         ### TURN LOOP
 
         sidebar.right()
         sidebar.bottom()
-        sidebar.icons()
+        sidebar.icons(turnamount)
             ### ORDER SHOULD BE OCEAN GRASS DESERT SNOW MOUNTAIN
             ### GEN
         for tile in seaCoords:
@@ -648,7 +702,14 @@ while True:
         for tile in desertCoords:
            win.blit(sand,(tile))
         for tile in mountainCoords:
-            win.blit(mountain,(tile))
+            win.blit(mountain,((tile[0]+mountainOffset[tile]),(tile[1])))
+        for tile in treeCoords:
+            win.blit(tree,((tile[0]+treeOffset[tile]),(tile[1])))
+    #    for tile in area:
+    #        win.blit(test,(tile))
+    #    for tile in range(len(bigpack)):
+    #        win.blit(test,(bigpack[tile][8]))
+
         win.blit(button,(640,640,640+192,640+192))
 
 
@@ -656,21 +717,36 @@ while True:
 
     ### IF CLICKED ON TRIBE
         for item in bigpack:
-            thicc = 4
+            thicc = 1
+            if myalpha == 180:
+                thicc = 4
             territory = game.Surface((16,16))
             territory.fill((item[1]))
             territoryA = game.Surface((thicc,16))
-            territoryA.fill((item[1]))
             territoryB = game.Surface((16,thicc))
-            territoryB.fill((item[1]))
             territoryC = game.Surface((thicc,thicc))
-            territoryC.fill((item[1]))
+
             territory.set_alpha(myalpha)
+            if myalpha == 180:
+                territoryA.fill((item[1]))
+                territoryB.fill((item[1]))
+                territoryC.fill((item[1]))
+        #    elif myalpha == 1000:
+        #        territoryA.fill((0,0,0))
+        #        territoryB.fill((0,0,0))
+        #        territoryC.fill((0,0,0))
 
             for tile in item[0]:
+
+
                 if tile in posSpawnCoords:
                     posSpawnCoords.remove(tile)
-                if myalpha == 180:
+
+
+                if myalpha != 180:
+                    win.blit(territory, ((tile)))
+
+                if myalpha == 180 or myalpha == 1000:
                     if ((tile[0]+16,tile[1])) not in item[0]:
                         win.blit(territoryA, ((tile[0]+(16-thicc),tile[1])))
                     if ((tile[0]-16,tile[1])) not in item[0]:
@@ -690,15 +766,13 @@ while True:
                     if ((tile[0]+16,tile[1]-16)) not in item[0]:
                         win.blit(territoryC, ((tile[0]+(16-thicc),tile[1])))
 
-                else:
-                    win.blit(territory, ((tile)))
                 if territory.get_rect(top=(tile[1]),left=(tile[0])).collidepoint(game.mouse.get_pos()):
                     for event in game.event.get():
                         if event.type == game.MOUSEBUTTONDOWN:
                             Tribemus.play()
                             #print(item[1])
                             civselected = bigpack.index(item)
-
+            #    thicc = random.randint(1,6)
 
 
         if civselected != -1:
@@ -735,15 +809,24 @@ while True:
                 elif politicalicon.get_rect(top=576,left=768).collidepoint(game.mouse.get_pos()):
                     myalpha = 1000
                     Iconmus.play()
-                elif quest1.get_rect(top=576-128,left=720).collidepoint(game.mouse.get_pos()):
+                elif num11.get_rect(top=464,left=672).collidepoint(game.mouse.get_pos()):
                     Iconmus.play()
+                    turnamount =1
+                elif num51.get_rect(top=464,left=720).collidepoint(game.mouse.get_pos()):
+                    Iconmus.play()
+                    turnamount =5
+                elif num101.get_rect(top=464,left=768).collidepoint(game.mouse.get_pos()):
+                    Iconmus.play()
+                    turnamount =10
+
+
                 ### REFRESH BUTTON
                 if button.get_rect(top=(640),left=(640)).collidepoint(event.pos):
-                    colorcodes = [(0,255,255),(255,0,255),(0,255,0),(255,182,34),(253,179,241),(205,255,0),(161,114,255)]
+                    colorcodes = [(0,255,255),(255,0,255),(0,255,0),(255,182,34),(253,179,241),(205,255,0),(161,114,255),(173,255,47),(144,238,144),(64,224,208),(127,255,212),(216,191,216),(95,158,160)]
                     Newmus.play()
 
                     year=0
-                    landCoords,seaCoords,allCoords,mountainCoords,snowCoords,grassCoords,desertCoords,posCoastCoords,posSpawnCoords = gen.finalgen()
+                    landCoords,seaCoords,allCoords,mountainCoords,snowCoords,grassCoords,desertCoords,treeCoords,posCoastCoords,posSpawnCoords,mountainOffset,treeOffset = gen.finalgen()
                     bigpack = list()
                     for i in range(random.randint(3,7)):
                         datapack,posSpawnCoords,colorcodes = societygen.spawning(posSpawnCoords,colorcodes)
@@ -761,7 +844,7 @@ while True:
                 ### NEXT TURN BUTTON
                 if arrow1.get_rect(top=512,left=688).collidepoint(game.mouse.get_pos()):
 
-                 #for i in range(10):
+                 for i in range(turnamount):
                     year+=1
                     Iconmus.play()
 
@@ -779,7 +862,7 @@ while True:
                             if ((i[0]-16,i[1])) in seaCoords or ((i[0]+16,i[1])) in seaCoords or ((i[0],i[1]-16)) in seaCoords or ((i[0],i[1]+16)) in seaCoords:
                                 cancolonize = True
                         if cancolonize == True:
-                            possibleTurns=other.turnsB(30,1,"colonize",bigpack,itemnum,possibleTurns)
+                            possibleTurns=other.turnsB(20,5,"colonize",bigpack,itemnum,possibleTurns)
 
                         possibleTurns=other.turnsS(10,20,"nothing",bigpack,itemnum,possibleTurns)
 
@@ -797,7 +880,22 @@ while True:
                             newsstuff.append("expand")
                         elif turnchoice == "nothing":
                             newsstuff.append("nothing")
-                            pass
+
+                            ### Smallchance events
+
+                            ### Rebelion
+                            if random.randint(1,5) == 1:
+                                area = other.findarea(bigpack[itemnum][0])
+                                if bigpack[itemnum][8] not in area:
+                                    datapack,area,colorcodes = societygen.spawning(area,colorcodes)
+                                    datapack[0] = list(area)
+                                    datapack[8] = random.choice(list(area))
+                                    bigpack[itemnum][0] = set(bigpack[itemnum][0])
+                                    bigpack[itemnum][0] -= area
+                                    bigpack[itemnum][0] = list(bigpack[itemnum][0])
+                                    bigpack.append(datapack)
+
+
                         elif turnchoice == "colonize":
                             newsstuff.append("colonize")
                             if posCoastCoords:
@@ -805,8 +903,13 @@ while True:
                         elif turnchoice == "consolidate":
                             newsstuff.append("consolidation")
 
+
+
+
+
                         for item in bigpack:
                             for tile in item[0]:
+
                                 if tile in posSpawnCoords:
                                     posSpawnCoords.remove(tile)
                                 if tile in posCoastCoords:
@@ -815,7 +918,7 @@ while True:
                         ### SECONDARY
                         if random.randint(1,5) == 1:
 
-                            if (bigpack[itemnum])[4] == "Chieftan" and len((bigpack[itemnum])[0]) > 20:
+                            if ((bigpack[itemnum])[4] == "Chieftan" or (bigpack[itemnum])[4] == "Provisional")and len((bigpack[itemnum])[0]) > 20:
                                 newsstuff.append("proclamation")
 
                                 govs = list()
@@ -844,6 +947,7 @@ while True:
                 endGame = True
                 worldGameState = False
         other.mousemovement()
+
         game.display.flip()
 
 
