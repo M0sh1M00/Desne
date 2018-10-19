@@ -1,8 +1,0 @@
-Nomadic:test
-Disorganized:test
-Literate:test
-Authoritarian:test
-Expansionist:+50% Expansion
-Collectivist:test
-Imperialist:+5% Colonisation
-thislineisntread

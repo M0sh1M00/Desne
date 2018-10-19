@@ -1,8 +1,0 @@
-Settled:test
-Organised:test
-Illiterate:test
-Peaceful:test
-Content:-50% Expansion
-Individualist:+15% Satisfaction
-Anti-Imperialist:-90% Colonisation
-thislineisntread
