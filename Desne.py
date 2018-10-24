@@ -840,7 +840,7 @@ while True:
                 win.blit(baroption2,(256,480))
             opt1 = treb50.render("Random", True, (0, 200, 200))
             win.blit(opt1,(tit.get_rect(center=(480+176, 240+320))))
-
+            savegame = 0
             for event in game.event.get():
                 if event.type == game.MOUSEBUTTONDOWN:
                         if baroption1.get_rect(top=(160),left=(256)).collidepoint(event.pos):
@@ -1249,10 +1249,13 @@ while True:
                         path, dirs, files = next(os.walk(os.getcwd()+"/Saves/World"+worlds[1]))
 
                         for thing in range(len(files)-1):
-                            os.remove(os.getcwd()+"/Saves/World"+worlds[1]+"/data"+str(thing)+".pickle")
+                            try:
+                                os.remove(os.getcwd()+"/Saves/World"+worlds[1]+"/data"+str(thing)+".pickle")
+                            except:
+                                pass
 
                         path, dirs, files = next(os.walk(os.getcwd()+"/DataFiles"))
-                        for thing in range(len(files)-1):
+                        for thing in range(len(files)-2):
                             with open("DataFiles/data"+str(thing)+".pickle","rb") as pickle_in:
                                 fulllist = (pickle.load(pickle_in))
                             with open("Saves/World"+worlds[1]+"/data"+str(thing)+".pickle","wb") as file:
