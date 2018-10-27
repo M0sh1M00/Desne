@@ -5,10 +5,19 @@ with contextlib.redirect_stdout(None):
 import random
 import News
 import pickle
+from ast import literal_eval
+
+global year,minsize,maxsize,minrectgen,maxrectgen,chanceremove,chanceamount,maptype,fileOpenType,colorcodes,fullcolorlist
+
+with open("Other/colors.txt","r") as colors:
+    fullcolorlist = list()
+    for color in colors:
+        color = color.rstrip("\n")
+        color = literal_eval(color)
+        fullcolorlist.append(color)
 
 
-global year,minsize,maxsize,minrectgen,maxrectgen,chanceremove,chanceamount,maptype,fileOpenType,colorcodes
-colorcodes = [(0,255,255),(255,0,255),(0,255,0),(255,182,34),(253,179,241),(205,255,0),(161,114,255),(173,255,47),(144,238,144), (64,224,208),(127,255,212),(216,191,216),(95,158,160)]
+colorcodes = fullcolorlist[:]
 popdiviser = 0
 
 
@@ -380,8 +389,13 @@ class societygen():
             spawntile = random.choice(list(posSpawnCoords))
         if year == 0:
             posSpawnCoords.remove(spawntile)
-        color = (random.choice(colorcodes))#150
-        colorcodes.remove(color)
+        try:
+            color = (random.choice(colorcodes))#150
+            colorcodes.remove(color)
+        except:
+            colorcodes = fullcolorlist[:]
+            color = (random.choice(colorcodes))#150
+            colorcodes.remove(color)
         char = open("TextFiles/SocietyCharacteristics.txt","r")
         charlist1 = list()
         for line in char:
@@ -636,7 +650,7 @@ class other():
         ranTile = random.choice(list(Coords))
         area = {(ranTile)}
         temp = set()
-        for i in range(int(  len(Coords)/2/2/2 ) ):
+        for i in range(int(  len(Coords)/random.randint(1,10) ) ):
             for tile in area:
                 for num in range(8):
                     xplus= 0
@@ -725,10 +739,8 @@ class other():
             return possibleTurns
         else:
             return possibleTurns
-    def coloramounts(bigpack):
-        colorcodes = [(0,255,255),(255,0,255),(0,255,0),(255,182,34),(253,179,241),(205,255,0),(161,114,255),(173,255,47),(144,238,144), (64,224,208),(127,255,212),(216,191,216),(95,158,160)]
-        for pack in bigpack:
-            colorcodes.remove(pack[1])
+
+
 class nature():
     def volcanostuff(volcanoCoords):
 
@@ -845,8 +857,8 @@ while True:
                 if event.type == game.MOUSEBUTTONDOWN:
                         if baroption1.get_rect(top=(160),left=(256)).collidepoint(event.pos):
                             Newmus.play()
-                            minsize = 6
-                            maxsize = 12
+                            minsize = 8#6
+                            maxsize = 14#12
                             minrectgen = 6
                             maxrectgen = 6
                             chanceremove = 200
@@ -898,12 +910,8 @@ while True:
             []
 
             ]
-
             #for option in optionList:
-
             #path, dirs, files = next(os.walk(os.getcwd()+"/Saves/World"+str(savegame)))
-
-
 
             win.blit(baroption1,(256,160))
             if baroption2.get_rect(top=(160),left=(256)).collidepoint(game.mouse.get_pos()):
@@ -1020,13 +1028,14 @@ while True:
                     waveCoords.append(  [ (-16,(random.randint(1,16)*40)),random.randint(2,5)   ]   )
                 print(waveCoords)
                 '''
+                colorcodes = fullcolorlist[:]
 
                 worldGameState = True
                 gamereset = False
     else:
-        year = 0
         path, dirs, files = next(os.walk(os.getcwd()+"/Saves/World"+str(savegame)))
-        maxyear =len(files)-2
+        maxyear =len(files)-3
+        year = maxyear
         civselected = -1
 
 
@@ -1056,13 +1065,18 @@ while True:
                     mountainOffset = Naturedata[10]
                     treeOffset = Naturedata[11]
                     volcanoCoords = Naturedata[12]
+                    #titleGameState=True
+                    #break
+                #    worldGameState=False
             except:
-                titleGameState=True
-                break
+                print("you should only get this message if you are trying to click on an empty save file")
                 worldGameState=False
 
 
 
+        if worldGameState == False:
+            titleGameState = True
+            break
         gameloops+=1
         ###LOADING IN THE ICONS AS WELL AS THE SIDEBARS
         sidebar.right()
@@ -1176,20 +1190,21 @@ while True:
 
         if civselected != -1:
             try:
+                textcolor = (253,253,150)
                 helve = game.font.SysFont("Trebuchet MS",40)
                 helve2 = game.font.SysFont("Trebuchet MS",18)
-                tribename = helve.render(bigpack[civselected][3], True, (bigpack[civselected][1]))
+                tribename = helve.render(bigpack[civselected][3], True, textcolor)
                 char1 = bigpack[civselected][2][0]
                 char1 = char1.split(":")
-                char1N = helve2.render(char1[0], True, (bigpack[civselected][1]))
+                char1N = helve2.render(char1[0], True, textcolor)
                 char2 = bigpack[civselected][2][1]
                 char2 = char2.split(":")
-                char2N = helve2.render(char2[0], True, (bigpack[civselected][1]))
+                char2N = helve2.render(char2[0], True, textcolor)
                 char3 = bigpack[civselected][2][2]
                 char3 = char3.split(":")
-                char3N = helve2.render(char3[0], True, (bigpack[civselected][1]))
-                gov = helve2.render("Gov: "+bigpack[civselected][4], True, (bigpack[civselected][1]))
-                population = helve2.render("Pop: "+str(bigpack[civselected][5]), True, (bigpack[civselected][1]))
+                char3N = helve2.render(char3[0], True, textcolor)
+                gov = helve2.render("Gov: "+bigpack[civselected][4], True, textcolor)
+                population = helve2.render("Pop: "+str(bigpack[civselected][5]), True, textcolor)
                 win.blit(tribename,(640+16,16))
                 win.blit(char1N,(640+16,64+32))
                 win.blit(char2N,(640+16,64+48+32))
@@ -1248,7 +1263,7 @@ while True:
                         Iconmus.play()
                         path, dirs, files = next(os.walk(os.getcwd()+"/Saves/World"+worlds[1]))
 
-                        for thing in range(len(files)-1):
+                        for thing in range(len(files)-2):
                             try:
                                 os.remove(os.getcwd()+"/Saves/World"+worlds[1]+"/data"+str(thing)+".pickle")
                             except:
@@ -1256,7 +1271,7 @@ while True:
 
                         path, dirs, files = next(os.walk(os.getcwd()+"/DataFiles"))
                         for thing in range(len(files)-2):
-                            with open("DataFiles/data"+str(thing)+".pickle","rb") as pickle_in:
+                            with open(fileOpenType+"/data"+str(thing)+".pickle","rb") as pickle_in:
                                 fulllist = (pickle.load(pickle_in))
                             with open("Saves/World"+worlds[1]+"/data"+str(thing)+".pickle","wb") as file:
                                 pickle.dump(fulllist, file)
@@ -1273,11 +1288,9 @@ while True:
 
                 elif arrow1.get_rect(top=672,left=528).collidepoint(game.mouse.get_pos()):
                     Iconmus.play()
-
                     if year == maxyear:
                         for i in range(turnamount):
                             deleteevents = list()
-                            other.coloramounts(bigpack)
                             year+=1
                             maxyear = year
 
@@ -1350,7 +1363,7 @@ while True:
                                                 bigpack.append(datapack)
                                         if civgot != "false":
 
-                                            if whathappens == 2 and len(bigpack[itemnum][0]) <= random.randint(50,100) and len(bigpack[civgot][0]) <= random.randint(50,100):
+                                            if whathappens == 2: #and len(bigpack[itemnum][0]) <= random.randint(50,100) and len(bigpack[civgot][0]) <= random.randint(50,100):
                                                 deleteevents.append([civgot,itemnum,"merge"])
 
 
@@ -1410,7 +1423,40 @@ while True:
                                 ###Plague
                                 ###divide a random continents pop by random number
 
+                            if deleteevents:
+                                deleteeventdoing = random.choice(deleteevents)
+                                if deleteeventdoing[2] == "merge":
 
+                                    civgot = deleteeventdoing[1]
+                                    itemnum = deleteeventdoing[0]
+                                    newdatapack,area = societygen.spawning(bigpack[itemnum][0][:])
+                                    if random.randint(1,2) == 1:
+                                        if random.randint(1,2) ==1:
+                                            newdatapack[3] = bigpack[civgot][3]
+                                        else:
+                                            newdatapack[3] = bigpack[itemnum][3]
+                                    newdatapack[0] = bigpack[civgot][0] + bigpack[itemnum][0]
+                                    newdatapack[6] = bigpack[civgot][6] + bigpack[itemnum][6]
+                                    newdatapack[8] = bigpack[civgot][8]
+                                    if itemnum > civgot:
+                                        bigpack.remove(bigpack[itemnum])
+                                        bigpack.remove(bigpack[civgot])
+                                    else:
+                                        bigpack.remove(bigpack[civgot])
+                                        bigpack.remove(bigpack[itemnum])
+
+                                    bigpack.append(newdatapack)
+
+                                    if civselected == itemnum or civselected == civgot:
+                                        civselected = bigpack.index(newdatapack)
+                                    elif civselected >= bigpack.index(newdatapack):
+                                        civselected+=1
+
+
+                                    try:
+                                        bigpack[itemnum]
+                                    except:
+                                        continue
                             with open(fileOpenType+"/data"+str(year)+".pickle","wb") as file:
 
                                 pickle.dump([bigpack,fertilityIndex,Naturedata], file)
@@ -1426,41 +1472,6 @@ while True:
                                 Naturedata = fulllist[2][:]
                         except:
                             print("you shouldnt be getting this message. please msg oscar if u are. errorcode #0012")
-                    if deleteevents:
-                        deleteeventdoing = random.choice(deleteevents)
-                        if deleteeventdoing[2] == "merge":
-
-                            civgot = deleteeventdoing[1]
-                            itemnum = deleteeventdoing[0]
-                            newdatapack,area = societygen.spawning(bigpack[itemnum][0][:])
-                            if random.randint(1,2) == 1:
-                                if random.randint(1,2) ==1:
-                                    newdatapack[3] = bigpack[civgot][3]
-                                else:
-                                    newdatapack[3] = bigpack[itemnum][3]
-                            newdatapack[0] = bigpack[civgot][0] + bigpack[itemnum][0]
-                            newdatapack[6] = bigpack[civgot][6] + bigpack[itemnum][6]
-                            newdatapack[8] = bigpack[civgot][8]
-                            if itemnum > civgot:
-                                bigpack.remove(bigpack[itemnum])
-                                bigpack.remove(bigpack[civgot])
-                            else:
-                                bigpack.remove(bigpack[civgot])
-                                bigpack.remove(bigpack[itemnum])
-
-                            bigpack.append(newdatapack)
-
-                            if civselected == itemnum or civselected == civgot:
-                                civselected = bigpack.index(newdatapack)
-                            elif civselected >= bigpack.index(newdatapack):
-                                civselected+=1
-
-
-                            try:
-                                bigpack[itemnum]
-                            except:
-                                continue
-
                 ### BACKWARD BUTTON
 
                 elif arrow1.get_rect(top=752,left=528).collidepoint(game.mouse.get_pos()):
@@ -1498,12 +1509,18 @@ while True:
         other.displayyr()
         game.display.flip()
 
-    try:
-        for item in range(maxyear):
+    #try:
+    for item in range(maxyear):
+        try:
             os.remove(  os.getcwd()+"/DataFiles/"+ "data"+str(maxyear-item)+".pickle")
+        except:
+            pass
+    try:
         os.remove(  os.getcwd()+"/DataFiles/"+ "data0.pickle")
     except:
         pass
+    #except:
+    #    pass
     if endGame == True:
         break
 
