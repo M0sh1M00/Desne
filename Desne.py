@@ -5,26 +5,39 @@ with contextlib.redirect_stdout(None):
 import random
 import News
 import pickle
+import time
 from ast import literal_eval
+game.init()
 
-global year,minsize,maxsize,minrectgen,maxrectgen,chanceremove,chanceamount,maptype,fileOpenType,colorcodes,fullcolorlist
+game.font.init()
+#size40 = game.font.Font('myfont2.ttf', 40)
+#size18 = game.font.Font('myfont2.ttf', 18)
+#size15 = game.font.Font('myfont2.ttf', 15)
+#size120 = game.font.Font('myfont2.ttf', 120)
+#size80 = game.font.Font('myfont2.ttf', 80)
+#size20 = game.font.Font('myfont2.ttf', 20)
+#size17 = game.font.Font('myfont2.ttf', 17)
+size40 = game.font.Font('Other/blockfont.ttf', 35)
+size18 = game.font.Font('Other/blockfont.ttf', 16)
+size15 = game.font.Font('Other/blockfont.ttf', 15)
+size120 = game.font.Font('Other/blockfont.ttf', 100)
+size80 = game.font.Font('Other/blockfont.ttf', 60)
+size20 = game.font.Font('Other/blockfont.ttf', 17)
+size17 = game.font.Font('Other/blockfont.ttf', 15)
 
-with open("Other/colors.txt","r") as colors:
+global year,minsize,maxsize,minrectgen,maxrectgen,chanceremove,chanceamount,maptype,fileOpenType,colorcodes,fullcolorlist,textcolor,rotations
+textcolor = (253,253,150)
+textcolor = (253,213,10)
+with open("TextFiles/colors.txt","r") as colors:
     fullcolorlist = list()
     for color in colors:
         color = color.rstrip("\n")
         color = literal_eval(color)
         fullcolorlist.append(color)
-
-
 colorcodes = fullcolorlist[:]
 popdiviser = 0
 
-
-game.init()
 game.mixer.init()
-game.init()
-game.font.init()
 game.mixer.music.load('Audio/background.mp3')
 game.mixer.music.play(-1)
 Newmus = game.mixer.Sound('Audio/New.wav')
@@ -37,60 +50,78 @@ screenHeight = 640+320-128
 win = game.display.set_mode((screenWidth, screenHeight))
 game.display.set_caption("Desne")
 
-water = game.image.load("Terrain/water.png")
-wave = game.image.load("Terrain/wave.png")
-mountain = game.image.load("Terrain/mountain.png")
-grass = game.image.load("Terrain/grass.png")
-snow = game.image.load("Terrain/snow.png")
-sand = game.image.load("Terrain/desert.png")
-tree = game.image.load("Terrain/tree.png")
+water = game.image.load("Images/Terrain/water.png")
+wave = game.image.load("Images/Terrain/wave.png")
+mountain = game.image.load("Images/Terrain/mountain.png")
+grass = game.image.load("Images/Terrain/grass.png")
+snow = game.image.load("Images/Terrain/snow.png")
+sand = game.image.load("Images/Terrain/desert.png")
+tree = game.image.load("Images/Terrain/tree.png")
 
-vol1 = game.image.load("Terrain/volcano1.png")
-vol2 = game.image.load("Terrain/volcano2.png")
-vol3 = game.image.load("Terrain/volcano3.png")
-vol4 = game.image.load("Terrain/volcano4.png")
-vol5 = game.image.load("Terrain/volcano5.png")
-vol6 = game.image.load("Terrain/volcano6.png")
+vol1 = game.image.load("Images/Terrain/volcano1.png")
+vol2 = game.image.load("Images/Terrain/volcano2.png")
+vol3 = game.image.load("Images/Terrain/volcano3.png")
+vol4 = game.image.load("Images/Terrain/volcano4.png")
+vol5 = game.image.load("Images/Terrain/volcano5.png")
+vol6 = game.image.load("Images/Terrain/volcano6.png")
 
 mouse = game.image.load("Other/mouse.png")
 test = game.image.load("Other/test.png")
 
-bar = game.image.load("Bar/bar.png")
-baroption1 = game.image.load("Bar/baroption.png")
-baroption2 = game.image.load("Bar/baroption2.png")
-titleimg = game.image.load("Bar/titleimg.png")
-button = game.image.load("Bar/button.png")
-politicalicon = game.image.load("Bar/politicalicon1.png")
-treeicon = game.image.load("Bar/treeicon1.png")
-bothicon = game.image.load("Bar/bothicon1.png")
-politicalicon2 = game.image.load("Bar/politicalicon2.png")
-treeicon2 = game.image.load("Bar/treeicon2.png")
-bothicon2 = game.image.load("Bar/bothicon2.png")
-earth1 = game.image.load("Bar/earth1.png")
-earth2 = game.image.load("Bar/earth2.png")
-mail1 = game.image.load("Bar/mail1.png")
-mail2 = game.image.load("Bar/mail2.png")
-quest1 = game.image.load("Bar/quest1.png")
-quest2 = game.image.load("Bar/quest2.png")
-historychanger1 = game.image.load("Bar/historychanger1.png")
-historychanger2 = game.image.load("Bar/historychanger2.png")
+bar = game.image.load("Images/Bar/bar.png")
+baroption1 = game.image.load("Images/Bar/baroption.png")
+baroption2 = game.image.load("Images/Bar/baroption2.png")
+titleimg = game.image.load("Images/Bar/titleimg.png")
+button = game.image.load("Images/Bar/button.png")
+politicalicon = game.image.load("Images/Bar/politicalicon1.png")
+treeicon = game.image.load("Images/Bar/treeicon1.png")
+bothicon = game.image.load("Images/Bar/bothicon1.png")
+politicalicon2 = game.image.load("Images/Bar/politicalicon2.png")
+treeicon2 = game.image.load("Images/Bar/treeicon2.png")
+bothicon2 = game.image.load("Images/Bar/bothicon2.png")
+earth1 = game.image.load("Images/Bar/earth1.png")
+earth2 = game.image.load("Images/Bar/earth2.png")
+mail1 = game.image.load("Images/Bar/mail1.png")
+mail2 = game.image.load("Images/Bar/mail2.png")
+quest1 = game.image.load("Images/Bar/quest1.png")
+quest2 = game.image.load("Images/Bar/quest2.png")
+historychanger1 = game.image.load("Images/Bar/historychanger1.png")
+historychanger2 = game.image.load("Images/Bar/historychanger2.png")
 
 
-arrow1 = game.image.load("Bar/arrow1.png")
-arrow2 = game.image.load("Bar/arrow2.png")
-Barrow1 = game.image.load("Bar/Backarrow1.png")
-Barrow2 = game.image.load("Bar/Backarrow2.png")
+arrow1 = game.image.load("Images/Bar/arrow1.png")
+arrow2 = game.image.load("Images/Bar/arrow2.png")
+Barrow1 = game.image.load("Images/Bar/Backarrow1.png")
+Barrow2 = game.image.load("Images/Bar/Backarrow2.png")
 
 ###Numbers
-num11 = game.image.load("Bar/num11.png")
-num12 = game.image.load("Bar/num12.png")
-num101 = game.image.load("Bar/num101.png")
-num102 = game.image.load("Bar/num102.png")
-num51 = game.image.load("Bar/num51.png")
-num52 = game.image.load("Bar/num52.png")
+num11 = game.image.load("Images/Bar/num11.png")
+num12 = game.image.load("Images/Bar/num12.png")
+num101 = game.image.load("Images/Bar/num101.png")
+num102 = game.image.load("Images/Bar/num102.png")
+num51 = game.image.load("Images/Bar/num51.png")
+num52 = game.image.load("Images/Bar/num52.png")
+###Floopies
+redfloppy1 = game.image.load("Images/Disks/redfloppy1.png")
+redfloppy2 = game.image.load("Images/Disks/redfloppy2.png")
+greenfloppy1 = game.image.load("Images/Disks/greenfloppy1.png")
+greenfloppy2 = game.image.load("Images/Disks/greenfloppy2.png")
+bluefloppy1 = game.image.load("Images/Disks/bluefloppy1.png")
+bluefloppy2 = game.image.load("Images/Disks/bluefloppy2.png")
 
-
-
+class menu():
+    def title(word):
+        win.blit(titleimg,((0,0)))
+        tit = size120.render(word, True, (200, 200, 200))
+        win.blit(tit,(tit.get_rect(center=(416+16, 64))))
+        #416 is important for center
+    def bar(barOptions):
+        for option in barOptions:
+            win.blit(baroption1,(256,option[0]))
+            if baroption2.get_rect(top=(option[0]),left=(256)).collidepoint(game.mouse.get_pos()):
+                win.blit(baroption2,(256,option[0]))
+            opt1 = size80.render(option[1], True, textcolor)
+            win.blit(opt1,(baroption1.get_rect(center=(476, option[2]))))
 class gen():
 
     def allTiles():
@@ -367,11 +398,10 @@ class gen():
             volcanoCoords.append([myvolcano])
             mountainCoords.remove(myvolcano)
 
-        for tile in mountainCoords:
+        for tile in allCoords:
             mountainOffset[tile] = random.randint(0,4)
-        for tile in treeCoords:
+        for tile in allCoords:
             treeOffset[tile] = random.randint(0,8)
-
         posSpawnCoords = set((list(landCoords))[:])
         posCoastCoords = set()
         for i in posSpawnCoords:
@@ -558,9 +588,9 @@ class sidebar():
         [turnamount,5,480,720,num51,num52],
         [turnamount,10,480,768,num101,num102],
 
-        [savegame,1,48,672,num11,num12],
-        [savegame,2,48,720,num51,num52],
-        [savegame,3,48,768,num101,num102],
+        [savegame,1,48,672,redfloppy1,redfloppy2],
+        [savegame,2,48,720,greenfloppy1,greenfloppy2],
+        [savegame,3,48,768,bluefloppy1,bluefloppy2],
 
         [False,True,48+48,672,quest1,quest2],
 
@@ -586,6 +616,29 @@ class sidebar():
         win.blit(arrow1,(528,672))
         if arrow1.get_rect(top=672,left=528).collidepoint(game.mouse.get_pos()):
             win.blit(arrow2,(528,672))
+    def tribetext(civselected):
+        if civselected != -1:
+            try:
+                tribename = size40.render(bigpack[civselected][3], True, textcolor)
+                char1 = bigpack[civselected][2][0]
+                char1 = char1.split(":")
+                char1N = size18.render(char1[0], True, textcolor)
+                char2 = bigpack[civselected][2][1]
+                char2 = char2.split(":")
+                char2N = size18.render(char2[0], True, textcolor)
+                char3 = bigpack[civselected][2][2]
+                char3 = char3.split(":")
+                char3N = size18.render(char3[0], True, textcolor)
+                gov = size18.render("Gov: "+bigpack[civselected][4], True, textcolor)
+                population = size18.render("Pop: "+str(bigpack[civselected][5]), True, textcolor)
+                win.blit(tribename,(640+16,16))
+                win.blit(char1N,(640+16,64+32))
+                win.blit(char2N,(640+16,64+48+32))
+                win.blit(char3N,(640+16,128+32+32))
+                win.blit(gov,(640+16,240))
+                win.blit(population,(640+16,288))
+            except:
+                civselected = -1
 class society():
     def soilfertility(mountainCoords,snowCoords,grassCoords,desertCoords,treeCoords):
         fertilityIndex = {}
@@ -599,12 +652,11 @@ class society():
     def populationcalc(Coords,fertilityIndex):
         pop = 0
         Coords = list(set(Coords))
-    #    print(fertilityIndex,"\n")
+        #    print(fertilityIndex,"\n")
         for tile in Coords:
             pop+=fertilityIndex[tile][0]
 
         return pop
-
     def popadd(Coords,fertilityIndex,plus):
 
         for tile in Coords:
@@ -621,8 +673,48 @@ class society():
                 fertilityIndex[tile][0] = int(fertilityIndex[tile][0]+((fertilityIndex[tile][0]/100)*fertilityIndex[tile][2]))
 
         return fertilityIndex
+    def displaytribes(myalpha,posSpawnCoords,bigpack):
+        for item in bigpack:
+            if myalpha == 180:
+                thicc = 4
+            else:
+                thicc = 1
+            territory = game.Surface((16,16))
+            territory.fill((item[1]))
+            territoryA = game.Surface((thicc,16))
+            territoryB = game.Surface((16,thicc))
+            territoryC = game.Surface((thicc,thicc))
+
+            territory.set_alpha(myalpha)
+            if myalpha == 180:
+                territoryA.fill((item[1]))
+                territoryB.fill((item[1]))
+                territoryC.fill((item[1]))
+            for tile in item[0]:
+                if tile in posSpawnCoords:
+                    posSpawnCoords.remove(tile)
+                if myalpha != 180:
+                    win.blit(territory, ((tile)))
+                if myalpha != 0:
+                    if ((tile[0]+16,tile[1])) not in item[0]:
+                        win.blit(territoryA, ((tile[0]+(16-thicc),tile[1])))
+                    if ((tile[0]-16,tile[1])) not in item[0]:
+                        win.blit(territoryA, ((tile)))
+                    if ((tile[0],tile[1]+16)) not in item[0]:
+                        win.blit(territoryB, ((tile[0],tile[1]+(16-thicc))))
+                    if ((tile[0],tile[1]-16)) not in item[0]:
+                        win.blit(territoryB, ((tile)))
+                    if ((tile[0]-16,tile[1]-16)) not in item[0]:
+                        win.blit(territoryC, ((tile)))
+                    if ((tile[0]+16,tile[1]+16)) not in item[0]:
+                        win.blit(territoryC, ((tile[0]+(16-thicc),tile[1]+(16-thicc))))
+                    if ((tile[0]-16,tile[1]+16)) not in item[0]:
+                        win.blit(territoryC, ((tile[0],tile[1]+(16-thicc))))
+                    if ((tile[0]+16,tile[1]-16)) not in item[0]:
+                        win.blit(territoryC, ((tile[0]+(16-thicc),tile[1])))
 class other():
-    def mousemovement():
+    def mousemovement(*inCreateMode):
+
         x = (game.mouse.get_pos())[0]
         y = (game.mouse.get_pos())[1]
         i = 0
@@ -630,27 +722,29 @@ class other():
         while i != 640:
             mynums.append(i)
             i+=16
-        if (game.mouse.get_pos())[0] < 640 and (game.mouse.get_pos())[1] < 640:
+        if (game.mouse.get_pos())[0] < 640 and (game.mouse.get_pos())[1] < 640 and (game.mouse.get_pos())[0] != 0 and (game.mouse.get_pos())[1] != 0:
             game.mouse.set_visible(False)
-            treb = game.font.SysFont("Trebuchet MS",15)
-            xy = treb.render(("X: "+ str(int(x/16)+1) + "  Y: "+ str(int(y/16)+1))   , True, (0, 0, 0))
+            xy = size15.render(("X: "+ str(int(x/16)+1) + "  Y: "+ str(int(y/16)+1))   , True, (0, 0, 0))
             win.blit(xy,((0,640-16)))
             while x not in mynums:
                 x-=1
 
             while y not in mynums:
                 y-=1
+
+            if inCreateMode:
+                win.blit(inCreateMode[0],((x,y)))
+                #win.blit(game.transform.rotate(inCreateMode[0],rotations[(x,y)]),((x,y)))
             win.blit(mouse,((x,y)))
         else:
-            treb = game.font.SysFont("Trebuchet MS",15)
-            xy = treb.render(( "X:      Y: ")   , True, (0, 0, 0))
+            xy = size15.render(( "X:      Y: ")   , True, (0, 0, 0))
             win.blit(xy,((0,640-16)))
             game.mouse.set_visible(True)
     def findarea(Coords):
         ranTile = random.choice(list(Coords))
         area = {(ranTile)}
         temp = set()
-        for i in range(int(  len(Coords)/random.randint(1,10) ) ):
+        for i in range( len(Coords) ):
             for tile in area:
                 for num in range(8):
                     xplus= 0
@@ -671,12 +765,6 @@ class other():
                 area.add(tile)
         return area
     def findbordercountries(datapack,bigpack):
-
-
-
-
-
-
         possibleborders = []
         for otherdatapack in bigpack:
             if datapack != otherdatapack:
@@ -721,8 +809,7 @@ class other():
         else:
             return "false"
     def displayyr():
-        treb = game.font.SysFont("Trebuchet MS",15)
-        yeardisplay = treb.render(( "Year: "+str(year))   , True, (0, 0, 0))
+        yeardisplay = size15.render(( "Year: "+str(year))   , True, (0, 0, 0))
         win.blit(yeardisplay,((640-64-16,640-16)))
     def turnsB(sizeCondition,condition,turnType,bigpack,itemnum,possibleTurns):
         if len((bigpack[itemnum])[0]) > sizeCondition:
@@ -739,78 +826,62 @@ class other():
             return possibleTurns
         else:
             return possibleTurns
-
-
 class nature():
     def volcanostuff(volcanoCoords):
 
+        try:
+            for volcano in range(len(volcanoCoords)):
+                volcanoCoords[volcano][1]
+                if random.randint(1,5) == 1:
+                    volcanoCoords[volcano][1]+=1
+        except:
+            for volcano in range(len(volcanoCoords)):
+                volcanoCoords[volcano].append(random.randint(0,75))
         for volcano in volcanoCoords:
-            volcano[1]+=1
-        for volcano in volcanoCoords:
-            if volcano[1] == 500:
+            if volcano[1] == 80:
                 volcano[1] = 0
-            if volcano[1] >= 190:
+            if volcano[1] >= 75:
                 win.blit(vol6,(volcano[0]))
-            elif volcano[1] >= 180:
+            elif volcano[1] >= 70:
                 win.blit(vol5,(volcano[0]))
-            elif volcano[1] >= 170:
+            elif volcano[1] >= 65:
                 win.blit(vol4,(volcano[0]))
-            elif volcano[1] >= 150:
+            elif volcano[1] >= 60:
                 win.blit(vol3,(volcano[0]))
-            elif volcano[1] >= 80:
+            elif volcano[1] >= 20:
                 win.blit(vol2,(volcano[0]))
             elif volcano[1] >= 0:
                 win.blit(vol1,(volcano[0]))
         return volcanoCoords
+
 worldGameState = False
+worldCreateState = False
 titleGameState = True
 saveScreen = False
+isdoingworldreset = False
 ###FONTS
-treb120 = game.font.SysFont("Trebuchet MS",120)
-treb50 = game.font.SysFont("Trebuchet MS",80)
-treb20 = game.font.SysFont("Trebuchet MS",20)
-treb17 = game.font.SysFont("Trebuchet MS",17)
 gamereset = True
 endGame = False
 turnamount = 1
 savegame = 0
 myalpha = 180
 while True:
-
-    #while titleGameState == True:
     while titleGameState == True:
         mainScreen = True
+        saveScreen = False
         worldChoiceScreen = False
         while mainScreen == True:
-            win.blit(titleimg,((0,0)))
-            tit = treb120.render("DESNE", True, (200, 200, 200))
-            win.blit(tit,(tit.get_rect(center=(416+16, 64))))
-
-            #416
-            #128
-
-            win.blit(baroption1,(256,160))
-            if baroption2.get_rect(top=(160),left=(256)).collidepoint(game.mouse.get_pos()):
-                win.blit(baroption2,(256,160))
-            opt1 = treb50.render("New", True, (0, 200, 200))
-            win.blit(opt1,(tit.get_rect(center=(480, 240))))
-
-            win.blit(baroption1,(256,320))
-            if baroption2.get_rect(top=(320),left=(256)).collidepoint(game.mouse.get_pos()):
-                win.blit(baroption2,(256,320))
-            opt1 = treb50.render("Saves", True, (0, 200, 200))
-            win.blit(opt1,(tit.get_rect(center=(480, 240+160))))
-
-            win.blit(baroption1,(256,480))
-            if baroption2.get_rect(top=(480),left=(256)).collidepoint(game.mouse.get_pos()):
-                win.blit(baroption2,(256,480))
-            opt1 = treb50.render("Create", True, (0, 200, 200))
-            win.blit(opt1,(tit.get_rect(center=(480, 240+320))))
+            mainScreenOptions = [[160,"New",240],
+            [320,"Saves",240+160],
+            [480,"Create",240+320],]
+            menu.title("DESNE")
+            menu.bar(mainScreenOptions)
 
             for event in game.event.get():
                 if event.type == game.MOUSEBUTTONDOWN:
                         if baroption1.get_rect(top=(160),left=(256)).collidepoint(event.pos):
                             Newmus.play()
+                            savegame = 0
                             worldGameState = True
                             worldChoiceScreen = True
                             mainScreen = False
@@ -819,8 +890,12 @@ while True:
                             worldGameState = True
                             saveScreen = True
                             mainScreen = False
-
-
+                        if baroption1.get_rect(top=(320+160),left=(256)).collidepoint(event.pos):
+                            Newmus.play()
+                            savegame=0
+                            worldCreateState = True
+                            titleGameState = False
+                            mainScreen = False
                 if event.type == game.QUIT:
                     endGame = True
                     gamereset=False
@@ -831,28 +906,11 @@ while True:
             game.display.flip()
         while worldChoiceScreen == True:
 
-            win.blit(titleimg,((0,0)))
-            tit = treb120.render("World Options", True, (200, 200, 200))
-            win.blit(tit,(tit.get_rect(center=(416+16, 64))))
-
-            win.blit(baroption1,(256,160))
-            if baroption2.get_rect(top=(160),left=(256)).collidepoint(game.mouse.get_pos()):
-                win.blit(baroption2,(256,160))
-            opt1 = treb50.render("Island", True, (0, 200, 200))
-            win.blit(opt1,(tit.get_rect(center=(480+176, 240))))
-
-            win.blit(baroption1,(256,320))
-            if baroption2.get_rect(top=(320),left=(256)).collidepoint(game.mouse.get_pos()):
-                win.blit(baroption2,(256,320))
-            opt1 = treb50.render("Pangea", True, (0, 200, 200))
-            win.blit(opt1,(tit.get_rect(center=(480+176, 240+160))))
-
-            win.blit(baroption1,(256,480))
-            if baroption2.get_rect(top=(480),left=(256)).collidepoint(game.mouse.get_pos()):
-                win.blit(baroption2,(256,480))
-            opt1 = treb50.render("Random", True, (0, 200, 200))
-            win.blit(opt1,(tit.get_rect(center=(480+176, 240+320))))
-            savegame = 0
+            worldChoiceScreenOptions = [[160,"Island",240],
+            [320,"Pangea",240+160],
+            [480,"Random",240+320],]
+            menu.title("World Options")
+            menu.bar(worldChoiceScreenOptions)
             for event in game.event.get():
                 if event.type == game.MOUSEBUTTONDOWN:
                         if baroption1.get_rect(top=(160),left=(256)).collidepoint(event.pos):
@@ -860,7 +918,7 @@ while True:
                             minsize = 8#6
                             maxsize = 14#12
                             minrectgen = 6
-                            maxrectgen = 6
+                            maxrectgen = 7
                             chanceremove = 200
                             chanceamount = 200
                             maptype = "island"
@@ -901,35 +959,11 @@ while True:
             game.display.flip()
         while saveScreen == True:
 
-            win.blit(titleimg,((0,0)))
-            tit = treb120.render("Saves:", True, (200, 200, 200))
-            win.blit(tit,(tit.get_rect(center=(416+16, 64))))
-
-            optionList = [
-            [256,160,480+176,240,"Save 1",1],
-            []
-
-            ]
-            #for option in optionList:
-            #path, dirs, files = next(os.walk(os.getcwd()+"/Saves/World"+str(savegame)))
-
-            win.blit(baroption1,(256,160))
-            if baroption2.get_rect(top=(160),left=(256)).collidepoint(game.mouse.get_pos()):
-                win.blit(baroption2,(256,160))
-            opt1 = treb50.render("Save 1", True, (0, 200, 200))
-            win.blit(opt1,(tit.get_rect(center=(480, 240))))
-
-            win.blit(baroption1,(256,320))
-            if baroption2.get_rect(top=(320),left=(256)).collidepoint(game.mouse.get_pos()):
-                win.blit(baroption2,(256,320))
-            opt1 = treb50.render("Save 2", True, (0, 200, 200))
-            win.blit(opt1,(tit.get_rect(center=(480, 240+160))))
-
-            win.blit(baroption1,(256,480))
-            if baroption2.get_rect(top=(480),left=(256)).collidepoint(game.mouse.get_pos()):
-                win.blit(baroption2,(256,480))
-            opt1 = treb50.render("Save 3", True, (0, 200, 200))
-            win.blit(opt1,(tit.get_rect(center=(480, 240+320))))
+            mainScreenOptions = [[160,"Save 1",240],
+            [320,"Save 2",400],
+            [480,"Save 3",560],]
+            menu.title("Saves")
+            menu.bar(mainScreenOptions)
             for event in game.event.get():
                 if event.type == game.MOUSEBUTTONDOWN:
                         if baroption1.get_rect(top=(160),left=(256)).collidepoint(event.pos):
@@ -980,20 +1014,15 @@ while True:
                     worldGameState = False
                     titleGameState = False
                     saveScreen = False
-
-
-
-
             game.display.flip()
-    if savegame == 0:
-        fileOpenType = "DataFiles"
     if savegame == 1:
         fileOpenType = "Saves/World1"
-    if savegame == 2:
+    elif savegame == 2:
         fileOpenType = "Saves/World2"
-    if savegame == 3:
+    elif savegame == 3:
         fileOpenType = "Saves/World3"
-    if savegame == 0:
+    if savegame == 0 and worldGameState == True:
+        fileOpenType = "DataFiles"
         while gamereset == True:
                 landCoords,seaCoords,allCoords,mountainCoords,snowCoords,grassCoords,desertCoords,treeCoords,posCoastCoords,posSpawnCoords,mountainOffset,treeOffset,volcanoCoords = gen.finalgen()
                 Naturedata = [landCoords,seaCoords,allCoords,mountainCoords,snowCoords,grassCoords,desertCoords,treeCoords,posCoastCoords,posSpawnCoords,mountainOffset,treeOffset,volcanoCoords]
@@ -1017,8 +1046,12 @@ while True:
                                 for tile in item[0]:
                                     if tile in posSpawnCoords:
                                         posSpawnCoords.remove(tile)
-
-
+                volcanoCoordsCopy=list()
+                for item in volcanoCoords:
+                    volcanoCoordsCopy.append(item)
+                rotations = dict()
+                for tile in allCoords:
+                    rotations[tile] = random.choice([0,90,180,270])
                 with open(fileOpenType+"/data"+str(year)+".pickle","wb") as file:
                     pickle.dump([bigpack,fertilityIndex,Naturedata], file)
 
@@ -1032,13 +1065,14 @@ while True:
 
                 worldGameState = True
                 gamereset = False
-    else:
+    elif savegame > 0:
         path, dirs, files = next(os.walk(os.getcwd()+"/Saves/World"+str(savegame)))
         maxyear =len(files)-3
         year = maxyear
         civselected = -1
-
-
+    else:
+        year = 0
+        maxyear=year
     ###FIX THIS BUG
     win.blit(titleimg,((0,0)))
     ###ABLE TO SEE THROUGH WATER
@@ -1065,15 +1099,18 @@ while True:
                     mountainOffset = Naturedata[10]
                     treeOffset = Naturedata[11]
                     volcanoCoords = Naturedata[12]
+                    volcanoCoordsCopy=list()
+                    for item in volcanoCoords:
+                        volcanoCoordsCopy.append(item)
+                    rotations = dict()
+                    for tile in allCoords:
+                        rotations[tile] = random.choice([0,90,180,270])
                     #titleGameState=True
                     #break
                 #    worldGameState=False
             except:
                 print("you should only get this message if you are trying to click on an empty save file")
                 worldGameState=False
-
-
-
         if worldGameState == False:
             titleGameState = True
             break
@@ -1084,142 +1121,34 @@ while True:
         sidebar.icons(turnamount,myalpha,savegame)
         win.blit(button,(640,640,640+192,640+192))
         ### BLITTING THE MAIN TERRAIN ONTO THE MAP
-
-        for tile in seaCoords:win.blit(water,(tile))
-        for tile in snowCoords:win.blit(snow,(tile))
-        for tile in grassCoords:win.blit(grass,(tile))
-        for tile in desertCoords:win.blit(sand,(tile))
+        for tile in seaCoords:win.blit(game.transform.rotate(water,rotations[tile]),(tile))
+        for tile in snowCoords:win.blit(game.transform.rotate(snow,rotations[tile]),(tile))
+        for tile in grassCoords:win.blit(game.transform.rotate(grass,rotations[tile]),(tile))
+        for tile in desertCoords:win.blit(game.transform.rotate(sand,rotations[tile]),(tile))
         for tile in mountainCoords:win.blit(mountain,((tile[0]+mountainOffset[tile]),(tile[1])))
         for tile in treeCoords:win.blit(tree,((tile[0]+treeOffset[tile]),(tile[1])))
-
-        try:
-            for volcano in range(len(volcanoCoords)):
-                volcanoCoords[volcano][1]
-                if random.randint(1,5) == 1:
-                    volcanoCoords[volcano][1]+=1
-        except:
-            for volcano in range(len(volcanoCoords)):
-                volcanoCoords[volcano].append(random.randint(0,75))
-        for volcano in volcanoCoords:
-            if volcano[1] == 80:
-                volcano[1] = 0
-            if volcano[1] >= 75:
-                win.blit(vol6,(volcano[0]))
-            elif volcano[1] >= 70:
-                win.blit(vol5,(volcano[0]))
-            elif volcano[1] >= 65:
-                win.blit(vol4,(volcano[0]))
-            elif volcano[1] >= 60:
-                win.blit(vol3,(volcano[0]))
-            elif volcano[1] >= 20:
-                win.blit(vol2,(volcano[0]))
-            elif volcano[1] >= 0:
-                win.blit(vol1,(volcano[0]))
-
-
-
-
-        ### UNFINISHED WAVE ADDITION
-        '''    for pos in waveCoords:
-            print(pos[0])
-            win.blit(wave,(pos[0]))
-
-            waveCoords[waveCoords.index(pos)][0] = ((pos[0][0]+pos[1],pos[0][1]))
-            for number in range(1,16):
-                if ((waveCoords[waveCoords.index(pos)][0][0]+number,waveCoords[waveCoords.index(pos)][0][1])) in landCoords:
-                    waveCoords.remove(pos)
-
-        if random.randint(1,40) == 1:
-            waveCoords.append(  [ (-16,(random.randint(1,16)*40)),random.randint(2,5)   ]   )'''
-
+        #for tile in posSpawnCoords:win.blit(test,tile)
+        #print(volcanoCoordsCopy)
+        if volcanoCoordsCopy:
+            volcanoCoordsCopy = nature.volcanostuff(volcanoCoordsCopy)
         ###CALCULATING POPULATION
-
         for itemnum in range(len(bigpack)):
             bigpack[itemnum][5] = society.populationcalc(bigpack[itemnum][0],fertilityIndex)
-
         ###BLITTING THE TRIBES TERRITORY + THE ABILITY TO CLICK ON THE TRIBES *
 
-        for item in bigpack:
-            if myalpha == 180:
-                thicc = 4
-            else:
-                thicc = 1
-            territory = game.Surface((16,16))
-            territory.fill((item[1]))
-            territoryA = game.Surface((thicc,16))
-            territoryB = game.Surface((16,thicc))
-            territoryC = game.Surface((thicc,thicc))
-
-            territory.set_alpha(myalpha)
-            if myalpha == 180:
-                territoryA.fill((item[1]))
-                territoryB.fill((item[1]))
-                territoryC.fill((item[1]))
-            for tile in item[0]:
-                if tile in posSpawnCoords:
-                    posSpawnCoords.remove(tile)
-                if myalpha != 180:
-                    win.blit(territory, ((tile)))
-                if myalpha == 180 or myalpha == 1000:
-                    if ((tile[0]+16,tile[1])) not in item[0]:
-                        win.blit(territoryA, ((tile[0]+(16-thicc),tile[1])))
-                    if ((tile[0]-16,tile[1])) not in item[0]:
-                        win.blit(territoryA, ((tile)))
-                    if ((tile[0],tile[1]+16)) not in item[0]:
-                        win.blit(territoryB, ((tile[0],tile[1]+(16-thicc))))
-                    if ((tile[0],tile[1]-16)) not in item[0]:
-                        win.blit(territoryB, ((tile)))
-                    if ((tile[0]-16,tile[1]-16)) not in item[0]:
-                        win.blit(territoryC, ((tile)))
-                    if ((tile[0]+16,tile[1]+16)) not in item[0]:
-                        win.blit(territoryC, ((tile[0]+(16-thicc),tile[1]+(16-thicc))))
-                    if ((tile[0]-16,tile[1]+16)) not in item[0]:
-                        win.blit(territoryC, ((tile[0],tile[1]+(16-thicc))))
-                    if ((tile[0]+16,tile[1]-16)) not in item[0]:
-                        win.blit(territoryC, ((tile[0]+(16-thicc),tile[1])))
-                if territory.get_rect(top=(tile[1]),left=(tile[0])).collidepoint(game.mouse.get_pos()):
-                    for event in game.event.get():
-                        if event.type == game.MOUSEBUTTONDOWN:
-                            Tribemus.play()
-
-
-
-                            civselected = bigpack.index(item)
-
+        society.displaytribes(myalpha,posSpawnCoords,bigpack)
         ###THE INFORMATION FOR THE TRIBES ON THE SIDEBAR *
-
-        if civselected != -1:
-            try:
-                textcolor = (253,253,150)
-                helve = game.font.SysFont("Trebuchet MS",40)
-                helve2 = game.font.SysFont("Trebuchet MS",18)
-                tribename = helve.render(bigpack[civselected][3], True, textcolor)
-                char1 = bigpack[civselected][2][0]
-                char1 = char1.split(":")
-                char1N = helve2.render(char1[0], True, textcolor)
-                char2 = bigpack[civselected][2][1]
-                char2 = char2.split(":")
-                char2N = helve2.render(char2[0], True, textcolor)
-                char3 = bigpack[civselected][2][2]
-                char3 = char3.split(":")
-                char3N = helve2.render(char3[0], True, textcolor)
-                gov = helve2.render("Gov: "+bigpack[civselected][4], True, textcolor)
-                population = helve2.render("Pop: "+str(bigpack[civselected][5]), True, textcolor)
-                win.blit(tribename,(640+16,16))
-                win.blit(char1N,(640+16,64+32))
-                win.blit(char2N,(640+16,64+48+32))
-                win.blit(char3N,(640+16,128+32+32))
-                win.blit(gov,(640+16,240))
-                win.blit(population,(640+16,288))
-            except:
-                civselected = -1
-
+        sidebar.tribetext(civselected)
         ###CLICKING EVENTS
-
         keys = game.key.get_pressed()
         for event in game.event.get():
             if event.type == game.MOUSEBUTTONDOWN:
                 ###ICONS
+                for pack in bigpack:
+                    for tile in pack[0]:
+                        if game.Surface((16,16)).get_rect(top=(tile[1]),left=(tile[0])).collidepoint(game.mouse.get_pos()):
+                            Tribemus.play()
+                            civselected = bigpack.index(pack)
                 if treeicon.get_rect(top=672,left=432).collidepoint(game.mouse.get_pos()):
                     myalpha = 0
                     Iconmus.play()
@@ -1242,7 +1171,11 @@ while True:
                     Iconmus.play()
                     delyear = maxyear-year
                     for file in range(delyear):
-                        os.remove(  os.getcwd()+"/"+fileOpenType+ "/data"+str(maxyear-file)+".pickle")
+                        try:
+                            os.remove(  os.getcwd()+"/"+fileOpenType+ "/data"+str(maxyear-file)+".pickle")
+                        except:
+                            print("error, something might be wrong")
+                            pass
                     maxyear=year
                 elif quest1.get_rect(top=672,left=48+48).collidepoint(game.mouse.get_pos()):
                     Iconmus.play()
@@ -1251,30 +1184,28 @@ while True:
                     gamereset = True
                     titleGameState = True
                     worldGameState = False
-
                 ### SAVE GAMES *
                 Whenclickonsavebuttons = [
                 [672,"1",],
                 [720,"2",],
                 [768,"3",],
                 ]
-                for worlds in Whenclickonsavebuttons:
-                    if num101.get_rect(top=worlds[0],left=48).collidepoint(game.mouse.get_pos()):
-                        Iconmus.play()
-                        path, dirs, files = next(os.walk(os.getcwd()+"/Saves/World"+worlds[1]))
-
-                        for thing in range(len(files)-2):
-                            try:
-                                os.remove(os.getcwd()+"/Saves/World"+worlds[1]+"/data"+str(thing)+".pickle")
-                            except:
-                                pass
-
-                        path, dirs, files = next(os.walk(os.getcwd()+"/DataFiles"))
-                        for thing in range(len(files)-2):
-                            with open(fileOpenType+"/data"+str(thing)+".pickle","rb") as pickle_in:
-                                fulllist = (pickle.load(pickle_in))
-                            with open("Saves/World"+worlds[1]+"/data"+str(thing)+".pickle","wb") as file:
-                                pickle.dump(fulllist, file)
+                if savegame == 0:
+                    for worlds in Whenclickonsavebuttons:
+                        if num101.get_rect(top=worlds[0],left=48).collidepoint(game.mouse.get_pos()):
+                            Iconmus.play()
+                            path, dirs, files = next(os.walk(os.getcwd()+"/Saves/World"+worlds[1]))
+                            for thing in range(len(files)-2):
+                                try:
+                                    os.remove(os.getcwd()+"/Saves/World"+worlds[1]+"/data"+str(thing)+".pickle")
+                                except:
+                                    pass
+                            path, dirs, files = next(os.walk(os.getcwd()+"/DataFiles"))
+                            for thing in range(len(files)-2):
+                                with open(fileOpenType+"/data"+str(thing)+".pickle","rb") as pickle_in:
+                                    fulllist = (pickle.load(pickle_in))
+                                with open("Saves/World"+worlds[1]+"/data"+str(thing)+".pickle","wb") as file:
+                                    pickle.dump(fulllist, file)
                 ### NEW MAP BUTTON
 
                 if button.get_rect(top=(640),left=(640)).collidepoint(event.pos):
@@ -1282,6 +1213,7 @@ while True:
                         savegame = 0
                     Newmus.play()
                     gamereset = True
+                    isdoingworldreset = True
                     worldGameState = False
 
                 ### NEXT TURN BUTTON
@@ -1350,7 +1282,7 @@ while True:
                                         ### Rebelion
                                         civgot = other.findbordercountries(bigpack[itemnum],bigpack)
                                         whathappens = random.randint(1,30)
-                                        if whathappens == 1:
+                                        if whathappens ==1:
                                             area = other.findarea(bigpack[itemnum][0])
                                             if bigpack[itemnum][8] not in area:
                                                 #if len(area) > 5:
@@ -1363,7 +1295,7 @@ while True:
                                                 bigpack.append(datapack)
                                         if civgot != "false":
 
-                                            if whathappens == 2: #and len(bigpack[itemnum][0]) <= random.randint(50,100) and len(bigpack[civgot][0]) <= random.randint(50,100):
+                                            if whathappens == 2 and len(bigpack[itemnum][0]) <= random.randint(50,100) and len(bigpack[civgot][0]) <= random.randint(50,100):
                                                 deleteevents.append([civgot,itemnum,"merge"])
 
 
@@ -1451,14 +1383,7 @@ while True:
                                         civselected = bigpack.index(newdatapack)
                                     elif civselected >= bigpack.index(newdatapack):
                                         civselected+=1
-
-
-                                    try:
-                                        bigpack[itemnum]
-                                    except:
-                                        continue
                             with open(fileOpenType+"/data"+str(year)+".pickle","wb") as file:
-
                                 pickle.dump([bigpack,fertilityIndex,Naturedata], file)
                     else:
                         try:
@@ -1508,20 +1433,221 @@ while True:
         other.mousemovement()
         other.displayyr()
         game.display.flip()
+    while worldCreateState == True:
+        if gameloops == 0:
 
-    #try:
-    for item in range(maxyear):
+
+            #game.mixer.music.pause()
+            allCoords=gen.allTiles()
+            seaCoords=gen.allTiles()
+            snowCoords=set()
+            grassCoords=set()
+            desertCoords=set()
+            mountainCoords=set()
+            treeCoords=set()
+            volcanoCoords=set()
+            posSpawnCoords=set()
+            rotations = dict()
+            for tile in allCoords:
+                rotations[tile] = random.choice([0,90,180,270])
+            mountainOffset = {}
+            treeOffset = {}
+            biggrass = game.transform.scale(grass, (64, 64))
+            bigsand = game.transform.scale(sand, (64, 64))
+            bigsnow = game.transform.scale(snow, (64, 64))
+            bigmouse = game.transform.scale(mouse, (64, 64))
+            bigmountain = game.transform.scale(mountain, (64, 64))
+            bigtree = game.transform.scale(tree, (64, 64))
+            bigvolcano = game.transform.scale(vol1, (64, 64))
+            inHand = grass
+            bigpack=list()
+            for tile in allCoords:
+                mountainOffset[tile] = random.randint(0,4)
+            for tile in allCoords:
+                treeOffset[tile] = random.randint(0,8)
+
+
+        sidebar.right()
+        sidebar.bottom()
+        win.blit(button,(640,640,640+192,640+192))
+
+
+
+        x = (game.mouse.get_pos())[0]
+        y = (game.mouse.get_pos())[1]
+        i = 0
+        mynums = list()
+        while i != 640:
+            mynums.append(i)
+            i+=16
+        if (game.mouse.get_pos())[0] < 640 and (game.mouse.get_pos())[1] < 640 and (game.mouse.get_pos())[0] != 0 and (game.mouse.get_pos())[1] != 0:
+            while x not in mynums:
+                x-=1
+            while y not in mynums:
+                y-=1
+            validMouseSpace = True
+        else:
+            validMouseSpace = False
+
+
+        for event in game.event.get():
+            if validMouseSpace:
+                if game.mouse.get_pressed()[2]:
+                    for coordSet in [snowCoords,grassCoords,desertCoords,mountainCoords,treeCoords,volcanoCoords]:
+                        if ((x,y)) in coordSet:
+                            coordSet.remove(((x,y)))
+                            seaCoords.add(((x,y)))
+                if game.mouse.get_pressed()[0] and gameloops > 3:
+                    if inHand in [mountain,tree,vol1]:
+                        if ((x,y)) in snowCoords|grassCoords|desertCoords:
+                            if ((x,y)) not in volcanoCoords|mountainCoords|treeCoords:
+                                if inHand == mountain:
+                                    mountainCoords.add((x,y))
+                                if inHand == tree:
+                                    treeCoords.add((x,y))
+                                if inHand == vol1:
+                                     volcanoCoords.add((x,y))
+
+
+                    if inHand in [snow,grass,sand] and ((x,y)) not in seaCoords:
+                        for pack in [snowCoords,grassCoords,desertCoords,volcanoCoords,mountainCoords,treeCoords]:
+                            if ((x,y)) in pack:
+                                pack.remove(((x,y)))
+
+                    if inHand == snow:
+                        snowCoords.add((x,y))
+                    if inHand == grass:
+                        grassCoords.add((x,y))
+                    if inHand == sand:
+                        desertCoords.add((x,y))
+
+                    posSpawnCoords = grassCoords|snowCoords|desertCoords
+                    seaCoords -= grassCoords|snowCoords|desertCoords
+                    landCoords = grassCoords|snowCoords|desertCoords
+                    posCoastCoords = set()
+                    for i in posSpawnCoords:
+                        if ((i[0]-16,i[1])) in seaCoords or ((i[0]+16,i[1])) in seaCoords or ((i[0],i[1]-16)) in seaCoords or ((i[0],i[1]+16)) in seaCoords:
+                            posCoastCoords.add(i)
+            if event.type == game.MOUSEBUTTONDOWN:
+                if biggrass.get_rect(top=672,left=16).collidepoint(game.mouse.get_pos()):inHand = grass
+                if biggrass.get_rect(top=672,left=96).collidepoint(game.mouse.get_pos()):inHand = sand
+                if biggrass.get_rect(top=672,left=176).collidepoint(game.mouse.get_pos()):inHand = snow
+                if biggrass.get_rect(top=672,left=256).collidepoint(game.mouse.get_pos()):inHand = mountain
+                if biggrass.get_rect(top=672,left=336).collidepoint(game.mouse.get_pos()):inHand = tree
+                if biggrass.get_rect(top=672,left=416).collidepoint(game.mouse.get_pos()):inHand = vol1
+                ###SAVING WORLD
+                if button.get_rect(top=(640),left=(640)).collidepoint(event.pos):
+
+                    try:
+                        bigpack=list()
+                        posSpawnCoords = grassCoords|snowCoords|desertCoords
+                        for i in range(random.randint(3,7)):
+                            datapack,posSpawnCoords = societygen.spawning(posSpawnCoords)
+                            bigpack.append(datapack)
+                        ### FIRST EXPANSION
+                        for i in range(10):
+                            for itemnum in range(len(bigpack)):
+                                if random.randint(1,2) == 1:
+                                    bigpack[itemnum],posSpawnCoords = societygen.expand(bigpack[itemnum],posSpawnCoords,seaCoords)
+                                    for item in bigpack:
+                                        for tile in item[0]:
+                                            if tile in posSpawnCoords:
+                                                posSpawnCoords.remove(tile)
+
+                        fertilityIndex = society.soilfertility(mountainCoords,snowCoords,grassCoords,desertCoords,treeCoords)
+                        volcanoCoordsCopy=list()
+                        for i in volcanoCoords:
+                            volcanoCoordsCopy.append([i])
+                        Naturedata = [landCoords,seaCoords,allCoords,
+                        mountainCoords,snowCoords,grassCoords,desertCoords,
+                        treeCoords,posCoastCoords,posSpawnCoords,mountainOffset,
+                        treeOffset,volcanoCoordsCopy]
+
+                    except:continue
+
+
+                    path, dirs, files = next(os.walk(os.getcwd()+"/Saves/World1"))
+                    for thing in range(len(files)-2):
+                        try:
+                            os.remove(os.getcwd()+"/Saves/World1/data"+str(thing)+".pickle")
+                        except:
+                            pass
+
+                    with open("Saves/World1/data0.pickle","wb") as file:
+                        pickle.dump([bigpack,fertilityIndex,Naturedata], file)
+
+
+
+
+
+                    titleGameState = True
+                    worldCreateState = False
+                    win.blit(titleimg,(0,0))
+            if False:#not validMouseSpace and game.mouse.get_pressed()[2]:
+                bigpack=list()
+                posSpawnCoords = grassCoords|snowCoords|desertCoords
+                for i in range(random.randint(3,7)):
+                    datapack,posSpawnCoords = societygen.spawning(posSpawnCoords)
+                    bigpack.append(datapack)
+                ### FIRST EXPANSION
+                for i in range(10):
+                    for itemnum in range(len(bigpack)):
+                        if random.randint(1,2) == 1:
+                            bigpack[itemnum],posSpawnCoords = societygen.expand(bigpack[itemnum],posSpawnCoords,seaCoords)
+                            for item in bigpack:
+                                for tile in item[0]:
+                                    if tile in posSpawnCoords:
+                                        posSpawnCoords.remove(tile)
+            if event.type == game.QUIT:
+                endGame = True
+                worldCreateState = False
+
+        for tile in seaCoords:win.blit(game.transform.rotate(water,rotations[tile]),(tile))
+        for tile in snowCoords:win.blit(game.transform.rotate(snow,rotations[tile]),(tile))
+        for tile in grassCoords:win.blit(game.transform.rotate(grass,rotations[tile]),(tile))
+        for tile in desertCoords:win.blit(game.transform.rotate(sand,rotations[tile]),(tile))
+        for tile in mountainCoords:win.blit(mountain,((tile[0]+mountainOffset[tile]),(tile[1])))
+        for tile in treeCoords:win.blit(tree,((tile[0]+treeOffset[tile]),(tile[1])))
+        for tile in volcanoCoords:win.blit(game.transform.rotate(vol1,360),(tile))
+        #if volcanoCoords:
+        #    volcanoCoords = nature.volcanostuff(volcanoCoords)
+
+
         try:
-            os.remove(  os.getcwd()+"/DataFiles/"+ "data"+str(maxyear-item)+".pickle")
+            society.displaytribes(1000,posSpawnCoords,bigpack)
         except:
             pass
-    try:
-        os.remove(  os.getcwd()+"/DataFiles/"+ "data0.pickle")
-    except:
-        pass
-    #except:
-    #    pass
-    if endGame == True:
-        break
+
+
+        creationicons = {biggrass:(16,672),bigsand:(96,672),bigsnow:(176,672),bigmountain:(256,672),bigtree:(336,672),bigvolcano:(416,672)}
+        for icon in creationicons:
+            win.blit(icon,creationicons[icon])
+            win.blit(bigmouse,creationicons[icon])
+        other.displayyr()
+        other.mousemovement(inHand)
+        game.display.flip()
+        gameloops+=1
+    if isdoingworldreset == True:
+        isdoingworldreset = False
+        worldGameState = True
+    for item in range(maxyear):
+        try:os.remove(  os.getcwd()+"/DataFiles/"+ "data"+str(maxyear-item)+".pickle")
+        except:pass
+    try:os.remove(  os.getcwd()+"/DataFiles/"+ "data0.pickle")
+    except:pass
+    if endGame == True:break
 
 game.quit()
+
+### UNFINISHED WAVE ADDITION
+'''    for pos in waveCoords:
+    print(pos[0])
+    win.blit(wave,(pos[0]))
+
+    waveCoords[waveCoords.index(pos)][0] = ((pos[0][0]+pos[1],pos[0][1]))
+    for number in range(1,16):
+        if ((waveCoords[waveCoords.index(pos)][0][0]+number,waveCoords[waveCoords.index(pos)][0][1])) in landCoords:
+            waveCoords.remove(pos)
+
+if random.randint(1,40) == 1:
+    waveCoords.append(  [ (-16,(random.randint(1,16)*40)),random.randint(2,5)   ]   )'''
