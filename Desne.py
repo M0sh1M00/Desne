@@ -7,16 +7,12 @@ import News
 import pickle
 import time
 from ast import literal_eval
-game.init()
+from itertools import chain
 
+game.init()
+game.display.set_icon(game.image.load("Images/Bar/earth2.png"))
 game.font.init()
-#size40 = game.font.Font('myfont2.ttf', 40)
-#size18 = game.font.Font('myfont2.ttf', 18)
-#size15 = game.font.Font('myfont2.ttf', 15)
-#size120 = game.font.Font('myfont2.ttf', 120)
-#size80 = game.font.Font('myfont2.ttf', 80)
-#size20 = game.font.Font('myfont2.ttf', 20)
-#size17 = game.font.Font('myfont2.ttf', 17)
+
 size40 = game.font.Font('Other/blockfont.ttf', 35)
 size18 = game.font.Font('Other/blockfont.ttf', 16)
 size15 = game.font.Font('Other/blockfont.ttf', 15)
@@ -25,7 +21,8 @@ size80 = game.font.Font('Other/blockfont.ttf', 60)
 size20 = game.font.Font('Other/blockfont.ttf', 17)
 size17 = game.font.Font('Other/blockfont.ttf', 15)
 
-global year,minsize,maxsize,minrectgen,maxrectgen,chanceremove,chanceamount,maptype,fileOpenType,colorcodes,fullcolorlist,textcolor,rotations
+global year,minsize,maxsize,minrectgen,maxrectgen,chanceremove,chanceamount,maptype,fileOpenType,colorcodes,fullcolorlist,textcolor,rotations,allcities
+
 textcolor = (253,253,150)
 textcolor = (253,213,10)
 with open("TextFiles/colors.txt","r") as colors:
@@ -35,11 +32,18 @@ with open("TextFiles/colors.txt","r") as colors:
         color = literal_eval(color)
         fullcolorlist.append(color)
 colorcodes = fullcolorlist[:]
+random.seed(1)
+
+allcities = list()
+with open("TextFiles/cities.txt","r") as file:
+    for line in file:
+        allcities.append(line.rstrip("\n"))
+
 popdiviser = 0
 
 game.mixer.init()
-game.mixer.music.load('Audio/background.mp3')
-game.mixer.music.play(-1)
+#game.mixer.music.load('Audio/background.mp3')
+#game.mixer.music.play(-1)
 Newmus = game.mixer.Sound('Audio/New.wav')
 Tribemus = game.mixer.Sound('Audio/Tribe.wav')
 Iconmus = game.mixer.Sound('Audio/Icon.wav')
@@ -54,6 +58,10 @@ water = game.image.load("Images/Terrain/water.png")
 wave = game.image.load("Images/Terrain/wave.png")
 mountain = game.image.load("Images/Terrain/mountain.png")
 grass = game.image.load("Images/Terrain/grass.png")
+grass2 = game.image.load("Images/Terrain/grass2.png")
+grass3 = game.image.load("Images/Terrain/grass3.png")
+grass4 = game.image.load("Images/Terrain/grass4.png")
+
 snow = game.image.load("Images/Terrain/snow.png")
 sand = game.image.load("Images/Terrain/desert.png")
 tree = game.image.load("Images/Terrain/tree.png")
@@ -93,6 +101,8 @@ arrow1 = game.image.load("Images/Bar/arrow1.png")
 arrow2 = game.image.load("Images/Bar/arrow2.png")
 Barrow1 = game.image.load("Images/Bar/Backarrow1.png")
 Barrow2 = game.image.load("Images/Bar/Backarrow2.png")
+newsarrow1 = game.image.load("Images/Bar/newsarrow1.png")
+newsarrow2 = game.image.load("Images/Bar/newsarrow2.png")
 
 ###Numbers
 num11 = game.image.load("Images/Bar/num11.png")
@@ -108,6 +118,42 @@ greenfloppy1 = game.image.load("Images/Disks/greenfloppy1.png")
 greenfloppy2 = game.image.load("Images/Disks/greenfloppy2.png")
 bluefloppy1 = game.image.load("Images/Disks/bluefloppy1.png")
 bluefloppy2 = game.image.load("Images/Disks/bluefloppy2.png")
+
+cityorb = game.image.load("Images/Terrain/cityorb.png")
+
+
+def truncline(text, font, maxwidth):
+        real=len(text)
+        stext=text
+        l=font.size(text)[0]
+        cut=0
+        a=0
+        done=1
+        old = None
+        while l > maxwidth:
+            a=a+1
+            n=text.rsplit(None, a)[0]
+            if stext == n:
+                cut += 1
+                stext= n[:-cut]
+            else:
+                stext = n
+            l=font.size(stext)[0]
+            real=len(stext)
+            done=0
+        return real, done, stext
+
+def wrapline(text, font, maxwidth):
+    done=0
+    wrapped=[]
+
+    while not done:
+        nl, done, stext=truncline(text, font, maxwidth)
+        wrapped.append(stext.strip())
+        text=text[nl:]
+    return wrapped
+
+
 
 class menu():
     def title(word):
@@ -206,6 +252,7 @@ class gen():
                     if ((a,b)) in landCoords:
                         if random.randint(1,2) == 1:
                             if ((a-16,b)) in mountainCoords or ((a+16,b)) in mountainCoords or ((a,b-16)) in mountainCoords or ((a,b+16)) in mountainCoords:
+                                
                                 if random.randint(1,3) == 1:
                                     mountainCoords.add((a,b))
                             else:
@@ -412,17 +459,18 @@ class gen():
 
         return landCoords,seaCoords,allCoords,mountainCoords,snowCoords,grassCoords,desertCoords,treeCoords,posCoastCoords,posSpawnCoords,mountainOffset,treeOffset,volcanoCoords
 class societygen():
-    def spawning(posSpawnCoords):
+    def spawning(posSpawnCoords,colorcodes):
         spawntile = random.choice(list(posSpawnCoords))
 
         while spawntile not in posSpawnCoords:
             spawntile = random.choice(list(posSpawnCoords))
         if year == 0:
             posSpawnCoords.remove(spawntile)
-        try:
+        if colorcodes:
             color = (random.choice(colorcodes))#150
             colorcodes.remove(color)
-        except:
+
+        else:
             colorcodes = fullcolorlist[:]
             color = (random.choice(colorcodes))#150
             colorcodes.remove(color)
@@ -490,8 +538,17 @@ class societygen():
         military = 10 #K
 
         citzensatisfaction = random.randint(60,90) #percent
+        news=list()
 
-        datapack = [[spawntile],color,societycharacteristics,name,governmenttype,pop,military,citzensatisfaction,spawntile]
+        cities = dict()
+        try:
+            cities[spawntile] = random.choice(allcities)
+        except:
+            with open("TextFiles/cities.txt","r") as file:
+                for line in file:
+                    allcities.append(line.rstrip("\n"))
+            cities[spawntile] = random.choice(allcities)
+        datapack = [[spawntile],color,societycharacteristics,name,governmenttype,pop,military,citzensatisfaction,spawntile,news,cities]
         return datapack,posSpawnCoords
     def expand(datapack,posSpawnCoords,seaCoords):
         allTiles = datapack[0]
@@ -533,6 +590,7 @@ class societygen():
                     if ((curTile[0]+xplus), curTile[1]) in seaCoords and ((curTile[0]), curTile[1]+yplus) in seaCoords and ((curTile[0]+xplus), curTile[1]+yplus) in posSpawnCoords:
                         curTile = ((curTile[0]+xplus,curTile[1]+yplus))
                         datapack[0].append(curTile)
+                        posSpawnCoords.remove(curTile)
                         return datapack, posSpawnCoords
                     else:
                         mynums.remove(mynum)
@@ -577,7 +635,6 @@ class sidebar():
         bar2 = game.transform.rotate(bar, 90)
         win.blit(bar2,((640,320)))
     def icons(turnamount,myalpha,savegame):
-
         politicalicon2,treeicon2,bothicon2,num11,num51,num101
         values = [
         [myalpha,0,432,672,treeicon,treeicon2],
@@ -594,9 +651,8 @@ class sidebar():
 
         [False,True,48+48,672,quest1,quest2],
 
-
-
         [False,True,384,672,historychanger1,historychanger2],
+        [False,True,384-48,672,mail1,mail2],
         ]
         for itemnum in range(len(values)):
 
@@ -621,14 +677,11 @@ class sidebar():
             try:
                 tribename = size40.render(bigpack[civselected][3], True, textcolor)
                 char1 = bigpack[civselected][2][0]
-                char1 = char1.split(":")
-                char1N = size18.render(char1[0], True, textcolor)
+                char1N = size18.render(char1, True, textcolor)
                 char2 = bigpack[civselected][2][1]
-                char2 = char2.split(":")
-                char2N = size18.render(char2[0], True, textcolor)
+                char2N = size18.render(char2, True, textcolor)
                 char3 = bigpack[civselected][2][2]
-                char3 = char3.split(":")
-                char3N = size18.render(char3[0], True, textcolor)
+                char3N = size18.render(char3, True, textcolor)
                 gov = size18.render("Gov: "+bigpack[civselected][4], True, textcolor)
                 population = size18.render("Pop: "+str(bigpack[civselected][5]), True, textcolor)
                 win.blit(tribename,(640+16,16))
@@ -674,11 +727,17 @@ class society():
 
         return fertilityIndex
     def displaytribes(myalpha,posSpawnCoords,bigpack):
+        x=-1
         for item in bigpack:
+            x+=1
             if myalpha == 180:
                 thicc = 4
+                if civselected == x:
+                    thicc = 6
             else:
                 thicc = 1
+                if civselected == x:
+                    thicc = 4
             territory = game.Surface((16,16))
             territory.fill((item[1]))
             territoryA = game.Surface((thicc,16))
@@ -687,13 +746,19 @@ class society():
 
             territory.set_alpha(myalpha)
             if myalpha == 180:
-                territoryA.fill((item[1]))
-                territoryB.fill((item[1]))
-                territoryC.fill((item[1]))
+                if civselected != x:
+                    territoryA.fill((item[1]))
+                    territoryB.fill((item[1]))
+                    territoryC.fill((item[1]))
+                else:
+                    territoryA.fill((0,0,0))
+                    territoryB.fill((0,0,0))
+                    territoryC.fill((0,0,0))
+
             for tile in item[0]:
                 if tile in posSpawnCoords:
                     posSpawnCoords.remove(tile)
-                if myalpha != 180:
+                if myalpha == 1000:
                     win.blit(territory, ((tile)))
                 if myalpha != 0:
                     if ((tile[0]+16,tile[1])) not in item[0]:
@@ -712,9 +777,29 @@ class society():
                         win.blit(territoryC, ((tile[0],tile[1]+(16-thicc))))
                     if ((tile[0]+16,tile[1]-16)) not in item[0]:
                         win.blit(territoryC, ((tile[0]+(16-thicc),tile[1])))
+    def getnews (forward,newselected):
+        if forward == True:
+
+            try:
+                newselected+=1
+                headline = allnews[newselected][0]
+                story = wrapline(str(allnews[newselected][1]), size18, 700)
+            except:newselected=0
+        else:
+            try:
+                newselected-=1
+                headline = allnews[newselected][0]
+                story = wrapline(str(allnews[newselected][1]), size18, 700)
+            except:newselected=-1
+        headline = allnews[newselected][0]
+        story = wrapline(str(allnews[newselected][1]), size18, 700)
+        return headline,story,newselected
+    def displaycities (bigpack):
+        for itemnum in range(len(bigpack)):
+            for city in bigpack[itemnum][10]:
+                win.blit(cityorb,(city))
 class other():
     def mousemovement(*inCreateMode):
-
         x = (game.mouse.get_pos())[0]
         y = (game.mouse.get_pos())[1]
         i = 0
@@ -728,10 +813,8 @@ class other():
             win.blit(xy,((0,640-16)))
             while x not in mynums:
                 x-=1
-
             while y not in mynums:
                 y-=1
-
             if inCreateMode:
                 win.blit(inCreateMode[0],((x,y)))
                 #win.blit(game.transform.rotate(inCreateMode[0],rotations[(x,y)]),((x,y)))
@@ -810,7 +893,7 @@ class other():
             return "false"
     def displayyr():
         yeardisplay = size15.render(( "Year: "+str(year))   , True, (0, 0, 0))
-        win.blit(yeardisplay,((640-64-16,640-16)))
+        win.blit(yeardisplay,((640-64-16-16,640-16)))
     def turnsB(sizeCondition,condition,turnType,bigpack,itemnum,possibleTurns):
         if len((bigpack[itemnum])[0]) > sizeCondition:
             for i in range(condition):
@@ -826,6 +909,19 @@ class other():
             return possibleTurns
         else:
             return possibleTurns
+    def findxy(x,y):
+        if x>640 or y>640 or 0>x or 0>y:
+            return x,y
+        i = 0
+        mynums = list()
+        while i != 640:
+            mynums.append(i)
+            i+=16
+        while x not in mynums:
+            x-=1
+        while y not in mynums:
+            y-=1
+        return x,y
 class nature():
     def volcanostuff(volcanoCoords):
 
@@ -1031,11 +1127,13 @@ while True:
                 year = 0
                 maxyear = 0
                 civselected = -1
+                tileselected = (0,0)
                 area = set()
                 ### SOCIETYGEN
                 bigpack = list()
+                colorcodes = fullcolorlist[:]
                 for i in range(random.randint(3,7)):
-                    datapack,posSpawnCoords = societygen.spawning(posSpawnCoords)
+                    datapack,posSpawnCoords = societygen.spawning(posSpawnCoords,colorcodes)
                     bigpack.append(datapack)
                 ### FIRST EXPANSION
                 for i in range(10):
@@ -1049,9 +1147,16 @@ while True:
                 volcanoCoordsCopy=list()
                 for item in volcanoCoords:
                     volcanoCoordsCopy.append(item)
+                ###SMALL STUFF
                 rotations = dict()
                 for tile in allCoords:
-                    rotations[tile] = random.choice([0,90,180,270])
+                    rotations[tile] = random.choice([0,90,180,360])
+                grasstype = dict()
+                for tile in grassCoords:
+                    grasstype[tile] = random.choice([grass,grass2,grass3,grass4])
+
+
+
                 with open(fileOpenType+"/data"+str(year)+".pickle","wb") as file:
                     pickle.dump([bigpack,fertilityIndex,Naturedata], file)
 
@@ -1061,7 +1166,6 @@ while True:
                     waveCoords.append(  [ (-16,(random.randint(1,16)*40)),random.randint(2,5)   ]   )
                 print(waveCoords)
                 '''
-                colorcodes = fullcolorlist[:]
 
                 worldGameState = True
                 gamereset = False
@@ -1070,6 +1174,7 @@ while True:
         maxyear =len(files)-3
         year = maxyear
         civselected = -1
+        tileselected = (0,0)
     else:
         year = 0
         maxyear=year
@@ -1077,362 +1182,467 @@ while True:
     win.blit(titleimg,((0,0)))
     ###ABLE TO SEE THROUGH WATER
     gameloops = 0
+    mainGameScreen = True
+    newsGameScreen = False
     while worldGameState == True:
-        ###LOADING IN THE SAVEGAMES FOR PREMADE WORLDS
-        if savegame != 0 and gameloops == 0:
-            try:
-                with open(fileOpenType+"/data"+str(year)+".pickle","rb") as pickle_in:
-                    fulllist = (pickle.load(pickle_in))
-                    bigpack = fulllist[0][:]
-                    fertilityIndex = dict(fulllist[1])
-                    Naturedata = fulllist[2][:]
-                    landCoords = Naturedata[0]
-                    seaCoords = Naturedata[1]
-                    allCoords = Naturedata[2]
-                    mountainCoords = Naturedata[3]
-                    snowCoords = Naturedata[4]
-                    grassCoords = Naturedata[5]
-                    desertCoords = Naturedata[6]
-                    treeCoords = Naturedata[7]
-                    posCoastCoords = Naturedata[8]
-                    posSpawnCoords = Naturedata[9]
-                    mountainOffset = Naturedata[10]
-                    treeOffset = Naturedata[11]
-                    volcanoCoords = Naturedata[12]
-                    volcanoCoordsCopy=list()
-                    for item in volcanoCoords:
-                        volcanoCoordsCopy.append(item)
-                    rotations = dict()
-                    for tile in allCoords:
-                        rotations[tile] = random.choice([0,90,180,270])
-                    #titleGameState=True
-                    #break
-                #    worldGameState=False
-            except:
-                print("you should only get this message if you are trying to click on an empty save file")
-                worldGameState=False
-        if worldGameState == False:
-            titleGameState = True
-            break
-        gameloops+=1
-        ###LOADING IN THE ICONS AS WELL AS THE SIDEBARS
-        sidebar.right()
-        sidebar.bottom()
-        sidebar.icons(turnamount,myalpha,savegame)
-        win.blit(button,(640,640,640+192,640+192))
-        ### BLITTING THE MAIN TERRAIN ONTO THE MAP
-        for tile in seaCoords:win.blit(game.transform.rotate(water,rotations[tile]),(tile))
-        for tile in snowCoords:win.blit(game.transform.rotate(snow,rotations[tile]),(tile))
-        for tile in grassCoords:win.blit(game.transform.rotate(grass,rotations[tile]),(tile))
-        for tile in desertCoords:win.blit(game.transform.rotate(sand,rotations[tile]),(tile))
-        for tile in mountainCoords:win.blit(mountain,((tile[0]+mountainOffset[tile]),(tile[1])))
-        for tile in treeCoords:win.blit(tree,((tile[0]+treeOffset[tile]),(tile[1])))
-        #for tile in posSpawnCoords:win.blit(test,tile)
-        #print(volcanoCoordsCopy)
-        if volcanoCoordsCopy:
-            volcanoCoordsCopy = nature.volcanostuff(volcanoCoordsCopy)
-        ###CALCULATING POPULATION
-        for itemnum in range(len(bigpack)):
-            bigpack[itemnum][5] = society.populationcalc(bigpack[itemnum][0],fertilityIndex)
-        ###BLITTING THE TRIBES TERRITORY + THE ABILITY TO CLICK ON THE TRIBES *
-
-        society.displaytribes(myalpha,posSpawnCoords,bigpack)
-        ###THE INFORMATION FOR THE TRIBES ON THE SIDEBAR *
-        sidebar.tribetext(civselected)
-        ###CLICKING EVENTS
-        keys = game.key.get_pressed()
-        for event in game.event.get():
-            if event.type == game.MOUSEBUTTONDOWN:
-                ###ICONS
-                for pack in bigpack:
-                    for tile in pack[0]:
-                        if game.Surface((16,16)).get_rect(top=(tile[1]),left=(tile[0])).collidepoint(game.mouse.get_pos()):
-                            Tribemus.play()
-                            civselected = bigpack.index(pack)
-                if treeicon.get_rect(top=672,left=432).collidepoint(game.mouse.get_pos()):
-                    myalpha = 0
-                    Iconmus.play()
-                elif bothicon.get_rect(top=720,left=432).collidepoint(game.mouse.get_pos()):
-                    myalpha = 180
-                    Iconmus.play()
-                elif politicalicon.get_rect(top=768,left=432).collidepoint(game.mouse.get_pos()):
-                    myalpha = 1000
-                    Iconmus.play()
-                elif num11.get_rect(top=672,left=480).collidepoint(game.mouse.get_pos()):
-                    Iconmus.play()
-                    turnamount =1
-                elif num51.get_rect(top=720,left=480).collidepoint(game.mouse.get_pos()):
-                    Iconmus.play()
-                    turnamount =5
-                elif num101.get_rect(top=768,left=480).collidepoint(game.mouse.get_pos()):
-                    Iconmus.play()
-                    turnamount =10
-                elif historychanger1.get_rect(top=672,left=384).collidepoint(game.mouse.get_pos()):
-                    Iconmus.play()
-                    delyear = maxyear-year
-                    for file in range(delyear):
-                        try:
-                            os.remove(  os.getcwd()+"/"+fileOpenType+ "/data"+str(maxyear-file)+".pickle")
-                        except:
-                            print("error, something might be wrong")
-                            pass
-                    maxyear=year
-                elif quest1.get_rect(top=672,left=48+48).collidepoint(game.mouse.get_pos()):
-                    Iconmus.play()
-                    if savegame != 0:
-                        savegame = 0
-                    gamereset = True
-                    titleGameState = True
-                    worldGameState = False
-                ### SAVE GAMES *
-                Whenclickonsavebuttons = [
-                [672,"1",],
-                [720,"2",],
-                [768,"3",],
-                ]
-                if savegame == 0:
-                    for worlds in Whenclickonsavebuttons:
-                        if num101.get_rect(top=worlds[0],left=48).collidepoint(game.mouse.get_pos()):
-                            Iconmus.play()
-                            path, dirs, files = next(os.walk(os.getcwd()+"/Saves/World"+worlds[1]))
-                            for thing in range(len(files)-2):
-                                try:
-                                    os.remove(os.getcwd()+"/Saves/World"+worlds[1]+"/data"+str(thing)+".pickle")
-                                except:
-                                    pass
-                            path, dirs, files = next(os.walk(os.getcwd()+"/DataFiles"))
-                            for thing in range(len(files)-2):
-                                with open(fileOpenType+"/data"+str(thing)+".pickle","rb") as pickle_in:
-                                    fulllist = (pickle.load(pickle_in))
-                                with open("Saves/World"+worlds[1]+"/data"+str(thing)+".pickle","wb") as file:
-                                    pickle.dump(fulllist, file)
-                ### NEW MAP BUTTON
-
-                if button.get_rect(top=(640),left=(640)).collidepoint(event.pos):
-                    if savegame != 0:
-                        savegame = 0
-                    Newmus.play()
-                    gamereset = True
-                    isdoingworldreset = True
-                    worldGameState = False
-
-                ### NEXT TURN BUTTON
-
-                elif arrow1.get_rect(top=672,left=528).collidepoint(game.mouse.get_pos()):
-                    Iconmus.play()
-                    if year == maxyear:
-                        for i in range(turnamount):
-                            deleteevents = list()
-                            year+=1
-                            maxyear = year
-
-                            if 1==1:
-                                for itemnum in range(len(bigpack)):
-                                    try:
-                                        bigpack[itemnum]
-                                    except:
-                                        continue
-
-
-                                    ###BASE POPULATION CHANGE
-
-                                    if random.randint(1,4) != 1:
-                                        ###INCREASE
-                                        fertilityIndex = society.popadd(bigpack[itemnum][0],fertilityIndex,True)
-
-                                    else:
-                                        ###DECREASE
-                                        fertilityIndex = society.popadd(bigpack[itemnum][0],fertilityIndex,False)
-
-
-
-
-                                    newsstuff = list()
-                                    newslist = list()
-                                    possibleTurns = list()
-
-
-                                    #turnsB(sizeCondition,randomConditionSmall,randomConditionBig,turnType,bigpack,itemnum,possibleTurns)
-                                    possibleTurns=other.turnsB(20,4,"consolidate",bigpack,itemnum,possibleTurns)
-                                    cancolonize = False
-                                    for i in (bigpack[itemnum])[0]:
-                                        if ((i[0]-16,i[1])) in seaCoords or ((i[0]+16,i[1])) in seaCoords or ((i[0],i[1]-16)) in seaCoords or ((i[0],i[1]+16)) in seaCoords:
-                                            cancolonize = True
-                                    if cancolonize == True:
-                                        possibleTurns=other.turnsB(20,5,"colonize",bigpack,itemnum,possibleTurns)
-
-                                    possibleTurns=other.turnsS(10,20,"other",bigpack,itemnum,possibleTurns)
-
-                                    possibleTurns=other.turnsB(10,400,"other",bigpack,itemnum,possibleTurns)
-
-                                    possibleTurns=other.turnsS(15,800,"expand",bigpack,itemnum,possibleTurns)
-
-                                    possibleTurns=other.turnsB(15,600,"expand",bigpack,itemnum,possibleTurns)
-                                    turnchoice = random.choice(possibleTurns)
-                                    if turnchoice == "expand":
-                                        for num in range(random.randint(1,10)):
-                                            if posSpawnCoords:
-                                                bigpack[itemnum],posSpawnCoords = societygen.expand(bigpack[itemnum],posSpawnCoords,seaCoords)
-                                        newsstuff.append("expand")
-                                    if turnchoice == "other":
-
-
-                                        ### Smallchance events
-
-                                        ### Rebelion
-                                        civgot = other.findbordercountries(bigpack[itemnum],bigpack)
-                                        whathappens = random.randint(1,30)
-                                        if whathappens ==1:
-                                            area = other.findarea(bigpack[itemnum][0])
-                                            if bigpack[itemnum][8] not in area:
-                                                #if len(area) > 5:
-                                                datapack,area = societygen.spawning(area)
-                                                datapack[0] = list(area)
-                                                datapack[8] = random.choice(list(area))
-                                                bigpack[itemnum][0] = set(bigpack[itemnum][0])
-                                                bigpack[itemnum][0] -= area
-                                                bigpack[itemnum][0] = list(bigpack[itemnum][0])
-                                                bigpack.append(datapack)
-                                        if civgot != "false":
-
-                                            if whathappens == 2 and len(bigpack[itemnum][0]) <= random.randint(50,100) and len(bigpack[civgot][0]) <= random.randint(50,100):
-                                                deleteevents.append([civgot,itemnum,"merge"])
-
-
-                                        else:
-                                            newsstuff.append("nothing")
-                                    if turnchoice == "colonize":
-
-                                        if posCoastCoords:
-                                            newsstuff.append("colonize")
-                                            bigpack[itemnum],posCoastCoords = societygen.colonize(bigpack[itemnum],posCoastCoords,seaCoords)
-                                        else:
-                                            turnchoice = "consolidate"
-                                    if turnchoice == "consolidate":
-                                        newsstuff.append("consolidation")
-
-
-                                    for item in bigpack:
-                                        for tile in item[0]:
-
-                                            if tile in posSpawnCoords:
-                                                posSpawnCoords.remove(tile)
-                                            if tile in posCoastCoords:
-                                                posCoastCoords.remove(tile)
-
-                                    ### SECONDARY
-                                    if random.randint(1,5) == 1:
-
-                                        if ((bigpack[itemnum])[4] == "Chieftan" or (bigpack[itemnum])[4] == "Provisional")and len((bigpack[itemnum])[0]) > 20:
-                                            newsstuff.append("proclamation")
-
-                                            govs = list()
-                                            govs = ["Empire","Republic","Kingdom","Commune","Junta","Confederation"]
-                                            if "Expansionist,+50%"+" Expansion" in (bigpack[itemnum])[2]:
-                                                for i in range(3):
-                                                    govs.append("Empire")
-                                                govs.append("Junta")
-                                            (bigpack[itemnum])[4] = random.choice(govs)
-
-                                        elif (bigpack[itemnum])[4] == "Chieftan" and year > 40:
-                                            (bigpack[itemnum])[4] = "City State"
-
-                                    for object in newsstuff:
-                                        newslist.append(News.news(bigpack[itemnum],object))
-
-                                    #print(newslist)
-
-                                #    datapack = [spawntile,color,societycharacteristics,name,governmenttype,pop,military,citzensatisfaction]
-                            else:
-                                pass
-                            ###WorldEvents
-
-
-
-
-                            if random.randint(1,2) == 1:
-                                pass
-                                ###Plague
-                                ###divide a random continents pop by random number
-
-                            if deleteevents:
-                                deleteeventdoing = random.choice(deleteevents)
-                                if deleteeventdoing[2] == "merge":
-
-                                    civgot = deleteeventdoing[1]
-                                    itemnum = deleteeventdoing[0]
-                                    newdatapack,area = societygen.spawning(bigpack[itemnum][0][:])
-                                    if random.randint(1,2) == 1:
-                                        if random.randint(1,2) ==1:
-                                            newdatapack[3] = bigpack[civgot][3]
-                                        else:
-                                            newdatapack[3] = bigpack[itemnum][3]
-                                    newdatapack[0] = bigpack[civgot][0] + bigpack[itemnum][0]
-                                    newdatapack[6] = bigpack[civgot][6] + bigpack[itemnum][6]
-                                    newdatapack[8] = bigpack[civgot][8]
-                                    if itemnum > civgot:
-                                        bigpack.remove(bigpack[itemnum])
-                                        bigpack.remove(bigpack[civgot])
-                                    else:
-                                        bigpack.remove(bigpack[civgot])
-                                        bigpack.remove(bigpack[itemnum])
-
-                                    bigpack.append(newdatapack)
-
-                                    if civselected == itemnum or civselected == civgot:
-                                        civselected = bigpack.index(newdatapack)
-                                    elif civselected >= bigpack.index(newdatapack):
-                                        civselected+=1
-                            with open(fileOpenType+"/data"+str(year)+".pickle","wb") as file:
-                                pickle.dump([bigpack,fertilityIndex,Naturedata], file)
-                    else:
-                        try:
-                            for i in range(turnamount):
-                                if year != maxyear:
-                                    year += 1
-                            with open(fileOpenType+"/data"+str(year)+".pickle","rb") as pickle_in:
-                                fulllist = (pickle.load(pickle_in))
-                                bigpack = fulllist[0][:]
-                                fertilityIndex = dict(fulllist[1])
-                                Naturedata = fulllist[2][:]
-                        except:
-                            print("you shouldnt be getting this message. please msg oscar if u are. errorcode #0012")
-                ### BACKWARD BUTTON
-
-                elif arrow1.get_rect(top=752,left=528).collidepoint(game.mouse.get_pos()):
-                    Iconmus.play()
-                    for i in range(turnamount):
-                        if year != 0:
-                            year -=1
-
+        while mainGameScreen == True:
+            ###LOADING IN THE SAVEGAMES FOR PREMADE WORLDS
+            if savegame != 0 and gameloops == 0:
+                try:
                     with open(fileOpenType+"/data"+str(year)+".pickle","rb") as pickle_in:
                         fulllist = (pickle.load(pickle_in))
                         bigpack = fulllist[0][:]
                         fertilityIndex = dict(fulllist[1])
                         Naturedata = fulllist[2][:]
+                        landCoords = Naturedata[0]
+                        seaCoords = Naturedata[1]
+                        allCoords = Naturedata[2]
+                        mountainCoords = Naturedata[3]
+                        snowCoords = Naturedata[4]
+                        grassCoords = Naturedata[5]
+                        desertCoords = Naturedata[6]
+                        treeCoords = Naturedata[7]
+                        posCoastCoords = Naturedata[8]
+                        posSpawnCoords = Naturedata[9]
+                        mountainOffset = Naturedata[10]
+                        treeOffset = Naturedata[11]
+                        volcanoCoords = Naturedata[12]
+                        volcanoCoordsCopy=list()
+                        for item in volcanoCoords:
+                            volcanoCoordsCopy.append(item)
+                        rotations = dict()
+                        for tile in allCoords:
+                            rotations[tile] = random.choice([0,90,180,270])
+                        grasstype = dict()
+                        for tile in grassCoords:
+                            grasstype[tile] = random.choice([grass,grass2,grass3,grass4])
+                        #titleGameState=True
+                        #break
+                    #    worldGameState=False
+                except:
+                    print("you should only get this message if you are trying to click on an empty save file")
+                    worldGameState=False
+            if worldGameState == False:
+                titleGameState = True
+                break
+            gameloops+=1
+            ###LOADING IN THE ICONS AS WELL AS THE SIDEBARS
+            civselected = -1
+            for pack in bigpack:
+                if tileselected in pack[0]:
+                    civselected = bigpack.index(pack)
+            sidebar.right()
+            sidebar.bottom()
+            sidebar.icons(turnamount,myalpha,savegame)
+            win.blit(button,(640,640,640+192,640+192))
 
-            ###QUIT FUNCTION
+            ### BLITTING THE MAIN TERRAIN ONTO THE MAP
+            for tile in seaCoords:win.blit(game.transform.rotate(water,rotations[tile]),(tile))
+            for tile in snowCoords:win.blit(game.transform.rotate(snow,rotations[tile]),(tile))
+            for tile in grassCoords:win.blit(game.transform.rotate(grasstype[tile],rotations[tile]),(tile))
+            for tile in desertCoords:win.blit(game.transform.rotate(sand,rotations[tile]),(tile))
+            for tile in mountainCoords:win.blit(mountain,((tile[0]+mountainOffset[tile]),(tile[1])))
+            for tile in treeCoords:win.blit(tree,((tile[0]+treeOffset[tile]),(tile[1])))
+            win.blit(test,tileselected)
+            #for tile in posSpawnCoords:win.blit(test,tile)
+            #print(volcanoCoordsCopy)
+            if volcanoCoordsCopy:
+                volcanoCoordsCopy = nature.volcanostuff(volcanoCoordsCopy)
+            ###CALCULATING POPULATION
+            for itemnum in range(len(bigpack)):
+                bigpack[itemnum][5] = society.populationcalc(bigpack[itemnum][0],fertilityIndex)
+            ###BLITTING THE TRIBES TERRITORY + THE ABILITY TO CLICK ON THE TRIBES *
 
-            if event.type == game.QUIT:
-                endGame = True
-                worldGameState = False
-        if True:
-            landCoords = Naturedata[0]
-            seaCoords = Naturedata[1]
-            allCoords = Naturedata[2]
-            mountainCoords = Naturedata[3]
-            snowCoords = Naturedata[4]
-            grassCoords = Naturedata[5]
-            desertCoords = Naturedata[6]
-            treeCoords = Naturedata[7]
-            posCoastCoords = Naturedata[8]
-            posSpawnCoords = Naturedata[9]
-            mountainOffset = Naturedata[10]
-            treeOffset = Naturedata[11]
-            volcanoCoords = Naturedata[12]
-        other.mousemovement()
-        other.displayyr()
-        game.display.flip()
+            society.displaytribes(myalpha,posSpawnCoords,bigpack)
+            ###THE INFORMATION FOR THE TRIBES ON THE SIDEBAR *
+            sidebar.tribetext(civselected)
+            ### CITIES
+            society.displaycities (bigpack)
+            ###CLICKING EVENTS
+            keys = game.key.get_pressed()
+            for event in game.event.get():
+                if event.type == game.MOUSEBUTTONDOWN:
+
+                    ###ICONS
+                    for pack in bigpack:
+                        for tile in pack[0]:
+                            if game.Surface((16,16)).get_rect(top=(tile[1]),left=(tile[0])).collidepoint(game.mouse.get_pos()):
+                                Tribemus.play()
+
+                    x,y = other.findxy((game.mouse.get_pos())[0],(game.mouse.get_pos())[1])
+                    if (x,y) in allCoords:
+                        tileselected = (x,y)
+
+
+                                #civselected = bigpack.index(pack)
+                                #print(bigpack[civselected][1])
+                    if treeicon.get_rect(top=672,left=432).collidepoint(game.mouse.get_pos()):
+                        myalpha = 0
+                        Iconmus.play()
+                    elif bothicon.get_rect(top=720,left=432).collidepoint(game.mouse.get_pos()):
+                        myalpha = 180
+                        Iconmus.play()
+                    elif politicalicon.get_rect(top=768,left=432).collidepoint(game.mouse.get_pos()):
+                        myalpha = 1000
+                        Iconmus.play()
+                    elif num11.get_rect(top=672,left=480).collidepoint(game.mouse.get_pos()):
+                        Iconmus.play()
+                        turnamount =1
+                    elif num51.get_rect(top=720,left=480).collidepoint(game.mouse.get_pos()):
+                        Iconmus.play()
+                        turnamount =5
+                    elif num101.get_rect(top=768,left=480).collidepoint(game.mouse.get_pos()):
+                        Iconmus.play()
+                        turnamount =10
+                    elif historychanger1.get_rect(top=672,left=384).collidepoint(game.mouse.get_pos()):
+                        Iconmus.play()
+                        delyear = maxyear-year
+                        for file in range(delyear):
+                            try:
+                                os.remove(  os.getcwd()+"/"+fileOpenType+ "/data"+str(maxyear-file)+".pickle")
+                            except:
+                                print("error, something might be wrong")
+                                pass
+                        maxyear=year
+                    elif quest1.get_rect(top=672,left=48+48).collidepoint(game.mouse.get_pos()):
+                        Iconmus.play()
+                        if savegame != 0:
+                            savegame = 0
+                        gamereset = True
+                        titleGameState = True
+                        worldGameState = False
+                    elif mail1.get_rect(top=672,left=384-48).collidepoint(game.mouse.get_pos()):
+                        if civselected != -1:
+                            newsGameScreen = True
+                            mainGameScreen = False
+                    ### SAVE GAMES *
+                    Whenclickonsavebuttons = [
+                    [672,"1",],
+                    [720,"2",],
+                    [768,"3",],
+                    ]
+                    if savegame == 0:
+                        for worlds in Whenclickonsavebuttons:
+                            if num101.get_rect(top=worlds[0],left=48).collidepoint(game.mouse.get_pos()):
+                                Iconmus.play()
+                                path, dirs, files = next(os.walk(os.getcwd()+"/Saves/World"+worlds[1]))
+                                for thing in range(len(files)-2):
+                                    try:
+                                        os.remove(os.getcwd()+"/Saves/World"+worlds[1]+"/data"+str(thing)+".pickle")
+                                    except:
+                                        pass
+                                path, dirs, files = next(os.walk(os.getcwd()+"/DataFiles"))
+                                for thing in range(len(files)-2):
+                                    with open(fileOpenType+"/data"+str(thing)+".pickle","rb") as pickle_in:
+                                        fulllist = (pickle.load(pickle_in))
+                                    with open("Saves/World"+worlds[1]+"/data"+str(thing)+".pickle","wb") as file:
+                                        pickle.dump(fulllist, file)
+                    ### NEW MAP BUTTON
+
+                    if button.get_rect(top=(640),left=(640)).collidepoint(event.pos):
+                        if savegame != 0:
+                            savegame = 0
+                        Newmus.play()
+                        gamereset = True
+                        isdoingworldreset = True
+                        mainGameScreen= False
+                        worldGameState = False
+
+                    ### NEXT TURN BUTTON
+
+                    elif arrow1.get_rect(top=672,left=528).collidepoint(game.mouse.get_pos()):
+                        Iconmus.play()
+                        for i in range(turnamount):
+                            if year == maxyear:
+
+                                deleteevents = list()
+                                year+=1
+                                maxyear = year
+
+                                if 1==1:
+                                    for itemnum in range(len(bigpack)):
+                                        try:
+                                            bigpack[itemnum]
+                                        except:
+                                            continue
+                                        ###BASE POPULATION CHANGE
+                                        if random.randint(1,4) != 1:
+                                            ###INCREASE
+                                            fertilityIndex = society.popadd(bigpack[itemnum][0],fertilityIndex,True)
+
+                                        else:
+                                            ###DECREASE
+                                            fertilityIndex = society.popadd(bigpack[itemnum][0],fertilityIndex,False)
+                                        newsstuff = list()
+                                        newslist = list()
+                                        possibleTurns = list()
+                                        #turnsB(sizeCondition,randomConditionSmall,randomConditionBig,turnType,bigpack,itemnum,possibleTurns)
+                                        possibleTurns=other.turnsB(20,4,"consolidate",bigpack,itemnum,possibleTurns)
+                                        cancolonize = False
+                                        for i in (bigpack[itemnum])[0]:
+                                            if ((i[0]-16,i[1])) in seaCoords or ((i[0]+16,i[1])) in seaCoords or ((i[0],i[1]-16)) in seaCoords or ((i[0],i[1]+16)) in seaCoords:
+                                                cancolonize = True
+                                        if cancolonize == True:
+                                            possibleTurns=other.turnsB(20,5,"colonize",bigpack,itemnum,possibleTurns)
+
+                                        possibleTurns=other.turnsS(10,20,"other",bigpack,itemnum,possibleTurns)
+
+                                        possibleTurns=other.turnsB(10,400,"other",bigpack,itemnum,possibleTurns)
+
+                                        possibleTurns=other.turnsS(20,200,"expand",bigpack,itemnum,possibleTurns)
+
+                                        possibleTurns=other.turnsB(20,500,"expand",bigpack,itemnum,possibleTurns)
+
+                                        possibleTurns=other.turnsB(40,300,"expand",bigpack,itemnum,possibleTurns)
+                                        turnchoice = random.choice(possibleTurns)
+                                        ## ADDING CHECKS TO MAKE SURE EXPAND IS WORKING
+                                        if turnchoice == "expand":
+                                            for num in range(random.randint(1,10)):
+                                                if posSpawnCoords:
+                                                    bigpack[itemnum],posSpawnCoords = societygen.expand(bigpack[itemnum],posSpawnCoords,seaCoords)
+                                            newsstuff.append("expand")
+                                        if turnchoice == "other":
+                                            ### Smallchance events
+                                            ### Rebelion
+                                            civgot = other.findbordercountries(bigpack[itemnum],bigpack)
+                                            whathappens = random.randint(1,30)
+                                            if whathappens ==1:
+                                                area = other.findarea(bigpack[itemnum][0])
+                                                if bigpack[itemnum][8] not in area:
+                                                    #if len(area) > 5:
+                                                    datapack,area = societygen.spawning(area,colorcodes)
+                                                    datapack[0] = list(area)
+                                                    datapack[8] = random.choice(list(area))
+                                                    bigpack[itemnum][0] = set(bigpack[itemnum][0])
+                                                    bigpack[itemnum][0] -= area
+                                                    bigpack[itemnum][0] = list(bigpack[itemnum][0])
+                                                    bigpack.append(datapack)
+                                            if civgot != "false":
+
+                                                if whathappens == 2 and len(bigpack[itemnum][0]) <= random.randint(50,100) and len(bigpack[civgot][0]) <= random.randint(50,100):
+                                                    deleteevents.append([civgot,itemnum,"merge"])
+
+
+                                            else:
+                                                newsstuff.append("nothing")
+                                        if turnchoice == "colonize":
+
+                                            if posCoastCoords:
+                                                newsstuff.append("colonize")
+                                                bigpack[itemnum],posCoastCoords = societygen.colonize(bigpack[itemnum],posCoastCoords,seaCoords)
+                                            else:
+                                                turnchoice = "consolidate"
+                                        if turnchoice == "consolidate":
+                                            newsstuff.append("consolidation")
+
+                                        for item in bigpack:
+                                            for tile in item[0]:
+
+                                                if tile in posSpawnCoords:
+                                                    posSpawnCoords.remove(tile)
+                                                if tile in posCoastCoords:
+                                                    posCoastCoords.remove(tile)
+
+                                        ### SECONDARY
+                                        if random.randint(1,5) == 1:
+
+                                            if ((bigpack[itemnum])[4] == "Chieftan" or (bigpack[itemnum])[4] == "Provisional")and len((bigpack[itemnum])[0]) > 20:
+                                                newsstuff.append("proclamation")
+
+                                                govs = list()
+                                                govs = ["Empire","Republic","Kingdom","Commune","Junta","Confederation"]
+                                                if "Expansionist,+50%"+" Expansion" in (bigpack[itemnum])[2]:
+                                                    for i in range(3):
+                                                        govs.append("Empire")
+                                                    govs.append("Junta")
+                                                (bigpack[itemnum])[4] = random.choice(govs)
+
+                                            elif (bigpack[itemnum])[4] == "Chieftan" and year > 40:
+                                                (bigpack[itemnum])[4] = "City State"
+                                        for i in range(len(bigpack[itemnum][0])):
+                                            if random.randint(1,len(bigpack[itemnum][10])*30) == 1:
+
+                                                newCity = random.choice(bigpack[itemnum][0])
+
+                                                if newCity in bigpack[itemnum][10]:
+                                                    pass
+                                                else:
+                                                    try:
+                                                        bigpack[itemnum][10][newCity] = random.choice(allcities)
+                                                    except:
+                                                        with open("TextFiles/cities.txt","r") as file:
+                                                            for line in file:
+                                                                allcities.append(line.rstrip("\n"))
+                                                        cities[spawntile] = random.choice(allcities)
+
+                                        for object in newsstuff:
+                                            newslist.append(News.news(bigpack[itemnum],object))
+
+
+                                        newslist.append(["test","1"])
+                                        newslist.append(["test","2"])
+                                        newslist.append(["test","3"])
+                                        newslist.append(["test","4"])
+                                        bigpack[itemnum][9] = newslist[:]
+                                else:pass
+                                ###WorldEvents
+                                if random.randint(1,2) == 1:
+                                    pass
+                                    ###Plague
+                                    ###divide a random continents pop by random number
+
+                                if deleteevents:
+                                    deleteeventdoing = random.choice(deleteevents)
+                                    if deleteeventdoing[2] == "merge":
+
+                                        civgot = deleteeventdoing[1]
+                                        itemnum = deleteeventdoing[0]
+                                        newdatapack,area = societygen.spawning(bigpack[itemnum][0][:],colorcodes)
+                                        if random.randint(1,2) == 1:
+                                            if random.randint(1,2) ==1:
+                                                newdatapack[3] = bigpack[civgot][3]
+                                            else:
+                                                newdatapack[3] = bigpack[itemnum][3]
+                                        newdatapack[0] = bigpack[civgot][0] + bigpack[itemnum][0]
+                                        newdatapack[6] = bigpack[civgot][6] + bigpack[itemnum][6]
+                                        newdatapack[8] = bigpack[civgot][8]
+                                        newdatapack[10].update(bigpack[civgot][10])
+                                        newdatapack[10].update(bigpack[itemnum][10])
+                                        if itemnum > civgot:
+                                            bigpack.remove(bigpack[itemnum])
+                                            bigpack.remove(bigpack[civgot])
+                                        else:
+                                            bigpack.remove(bigpack[civgot])
+                                            bigpack.remove(bigpack[itemnum])
+
+                                        bigpack.append(newdatapack)
+
+                                        if civselected == itemnum or civselected == civgot:
+                                            civselected = bigpack.index(newdatapack)
+                                with open(fileOpenType+"/data"+str(year)+".pickle","wb") as file:
+                                    pickle.dump([bigpack,fertilityIndex,Naturedata], file)
+                            else:
+                                try:
+                                    if civselected != -1:
+                                        curciv = bigpack[civselected]
+                                    if year != maxyear:
+                                        year += 1
+                                    with open(fileOpenType+"/data"+str(year)+".pickle","rb") as pickle_in:
+                                        fulllist = (pickle.load(pickle_in))
+                                        bigpack = fulllist[0][:]
+                                        fertilityIndex = dict(fulllist[1])
+                                        Naturedata = fulllist[2][:]
+                                    if civselected != -1:
+                                        for i in bigpack:
+                                            if curciv[3] in i:
+                                                civselected = bigpack.index(i)
+                                            else:
+                                                if curciv[0] in i[0]:
+                                                    civselected = bigpack.index(i)
+                                except:
+                                    print("you shouldnt be getting this message. please msg oscar if u are. errorcode #0012")
+                    ### BACKWARD BUTTON
+
+                    elif arrow1.get_rect(top=752,left=528).collidepoint(game.mouse.get_pos()):
+                        Iconmus.play()
+                        for i in range(turnamount):
+                            if year != 0:
+                                year -=1
+
+                        with open(fileOpenType+"/data"+str(year)+".pickle","rb") as pickle_in:
+                            fulllist = (pickle.load(pickle_in))
+                            bigpack = fulllist[0][:]
+                            fertilityIndex = dict(fulllist[1])
+                            Naturedata = fulllist[2][:]
+
+
+
+                ###QUIT FUNCTION
+
+                if event.type == game.QUIT:
+                    endGame = True
+                    worldGameState = False
+            if True:
+                landCoords = Naturedata[0]
+                seaCoords = Naturedata[1]
+                allCoords = Naturedata[2]
+                mountainCoords = Naturedata[3]
+                snowCoords = Naturedata[4]
+                grassCoords = Naturedata[5]
+                desertCoords = Naturedata[6]
+                treeCoords = Naturedata[7]
+                posCoastCoords = Naturedata[8]
+                posSpawnCoords = Naturedata[9]
+                mountainOffset = Naturedata[10]
+                treeOffset = Naturedata[11]
+                volcanoCoords = Naturedata[12]
+            other.mousemovement()
+            other.displayyr()
+            game.display.flip()
+
+
+
+        gameloops = 0
+        while newsGameScreen == True:
+            win.blit(titleimg,(0,0))
+            if gameloops==0:#9 is news in datapack
+                allnews = bigpack[civselected][9][:]
+                newselected = 0
+                #news1 = size18.render(str(bigpack[civselected][9][0]), True, textcolor)
+                headline = allnews[0][0]
+                story = wrapline(str(allnews[0][1]), size18, 700)
+
+                bigearth = game.transform.scale(earth1, (208, 208))
+                bigearth2 = game.transform.scale(earth2, (208, 208))
+                bignewsarrow1 = game.transform.scale(newsarrow1, (208, 208))
+                bignewsarrow2 = game.transform.scale(newsarrow2, (208, 208))
+                bignewsarrow1back = game.transform.rotate(bignewsarrow1, 180)
+                bignewsarrow2back = game.transform.rotate(bignewsarrow2, 180)
+
+            if bignewsarrow1.get_rect(top=512,left=544).collidepoint(game.mouse.get_pos()):
+                win.blit(bignewsarrow2,((544,512)))
+            else:
+                win.blit(bignewsarrow1,((544,512)))
+
+            if bignewsarrow1back.get_rect(top=512,left=80).collidepoint(game.mouse.get_pos()):
+                win.blit(bignewsarrow2back,((80,512)))
+            else:
+                win.blit(bignewsarrow1back,((80,512)))
+
+            if bigearth.get_rect(top=512,left=312).collidepoint(game.mouse.get_pos()):
+                win.blit(bigearth2,((312,512)))
+            else:
+                win.blit(bigearth,((312,512)))
+
+
+
+            amount = 70
+            titlerender = size40.render(headline, True, textcolor)
+            win.blit(titlerender,(32,32))
+            for section in story:
+                amount+=16
+                render = size20.render(section, True, textcolor)
+                win.blit(render,(32,amount))
+            for event in game.event.get():
+                if event.type == game.MOUSEBUTTONDOWN:
+                    if bignewsarrow1.get_rect(top=512,left=544).collidepoint(game.mouse.get_pos()):
+                        Iconmus.play()
+                        headline,story,newselected = society.getnews(True,newselected)
+                    if bignewsarrow1.get_rect(top=512,left=80).collidepoint(game.mouse.get_pos()):
+                        Iconmus.play()
+                        headline,story,newselected = society.getnews(False,newselected)
+                    if bigearth.get_rect(top=512,left=312).collidepoint(game.mouse.get_pos()):
+                        Iconmus.play()
+                        mainGameScreen=True
+                        newsGameScreen=False
+
+                if event.type == game.QUIT:
+                    endGame = True
+                    worldGameState = False
+                    newsGameScreen= False
+            gameloops+=1
+            game.display.flip()
+
     while worldCreateState == True:
         if gameloops == 0:
 
@@ -1542,7 +1752,7 @@ while True:
                         bigpack=list()
                         posSpawnCoords = grassCoords|snowCoords|desertCoords
                         for i in range(random.randint(3,7)):
-                            datapack,posSpawnCoords = societygen.spawning(posSpawnCoords)
+                            datapack,posSpawnCoords = societygen.spawning(posSpawnCoords,colorcodes)
                             bigpack.append(datapack)
                         ### FIRST EXPANSION
                         for i in range(10):
@@ -1587,7 +1797,7 @@ while True:
                 bigpack=list()
                 posSpawnCoords = grassCoords|snowCoords|desertCoords
                 for i in range(random.randint(3,7)):
-                    datapack,posSpawnCoords = societygen.spawning(posSpawnCoords)
+                    datapack,posSpawnCoords = societygen.spawning(posSpawnCoords,colorcodes)
                     bigpack.append(datapack)
                 ### FIRST EXPANSION
                 for i in range(10):
@@ -1638,7 +1848,8 @@ while True:
     if endGame == True:break
 
 game.quit()
-
+game.quit()
+game.quit()
 ### UNFINISHED WAVE ADDITION
 '''    for pos in waveCoords:
     print(pos[0])
