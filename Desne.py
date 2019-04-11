@@ -32,7 +32,7 @@ with open("TextFiles/colors.txt","r") as colors:
         color = literal_eval(color)
         fullcolorlist.append(color)
 colorcodes = fullcolorlist[:]
-random.seed(1)
+#random.seed(1)
 
 allcities = list()
 with open("TextFiles/cities.txt","r") as file:
@@ -63,6 +63,8 @@ grass3 = game.image.load("Images/Terrain/grass3.png")
 grass4 = game.image.load("Images/Terrain/grass4.png")
 
 snow = game.image.load("Images/Terrain/snow.png")
+snowhalf1 = game.image.load("Images/Terrain/snowhalf1.png")
+snowcorner1 = game.image.load("Images/Terrain/snowcorner1.png")
 sand = game.image.load("Images/Terrain/desert.png")
 tree = game.image.load("Images/Terrain/tree.png")
 
@@ -252,7 +254,7 @@ class gen():
                     if ((a,b)) in landCoords:
                         if random.randint(1,2) == 1:
                             if ((a-16,b)) in mountainCoords or ((a+16,b)) in mountainCoords or ((a,b-16)) in mountainCoords or ((a,b+16)) in mountainCoords:
-                                
+
                                 if random.randint(1,3) == 1:
                                     mountainCoords.add((a,b))
                             else:
@@ -1188,7 +1190,7 @@ while True:
         while mainGameScreen == True:
             ###LOADING IN THE SAVEGAMES FOR PREMADE WORLDS
             if savegame != 0 and gameloops == 0:
-                try:
+                #try:
                     with open(fileOpenType+"/data"+str(year)+".pickle","rb") as pickle_in:
                         fulllist = (pickle.load(pickle_in))
                         bigpack = fulllist[0][:]
@@ -1219,9 +1221,9 @@ while True:
                         #titleGameState=True
                         #break
                     #    worldGameState=False
-                except:
-                    print("you should only get this message if you are trying to click on an empty save file")
-                    worldGameState=False
+                #except:
+                #    print("you should only get this message if you are trying to click on an empty save file")
+                #    worldGameState=False
             if worldGameState == False:
                 titleGameState = True
                 break
@@ -1241,6 +1243,26 @@ while True:
             for tile in snowCoords:win.blit(game.transform.rotate(snow,rotations[tile]),(tile))
             for tile in grassCoords:win.blit(game.transform.rotate(grasstype[tile],rotations[tile]),(tile))
             for tile in desertCoords:win.blit(game.transform.rotate(sand,rotations[tile]),(tile))
+            if 1==1:
+                for tile in snowCoords:
+                    if ((tile[0]+16,tile[1]-16)) in allCoords:
+                        win.blit(game.transform.rotate(snowcorner1,270),(tile[0]+16,tile[1]-16))
+                    if ((tile[0]+16,tile[1]+16)) in allCoords:
+                        win.blit(game.transform.rotate(snowcorner1,180),(tile[0]+16,tile[1]+16))
+                    if ((tile[0]-16,tile[1]-16)) in allCoords:
+                        win.blit(game.transform.rotate(snowcorner1,360),(tile[0]-16,tile[1]-16))
+                    if ((tile[0]-16,tile[1]+16)) in allCoords:
+                        win.blit(game.transform.rotate(snowcorner1,90),(tile[0]-16,tile[1]+16))
+
+                    if ((tile[0]+16,tile[1])) in allCoords:
+                        win.blit(game.transform.rotate(snowhalf1,270),(tile[0]+16,tile[1]))
+                    if ((tile[0]-16,tile[1])) in allCoords:
+                        win.blit(game.transform.rotate(snowhalf1,90),(tile[0]-16,tile[1]))
+                    if ((tile[0],tile[1]+16)) in allCoords:
+                        win.blit(game.transform.rotate(snowhalf1,180),(tile[0],tile[1]+16))
+                    if ((tile[0],tile[1]-16)) in allCoords:
+                        win.blit(game.transform.rotate(snowhalf1,360),(tile[0],tile[1]-16))
+
             for tile in mountainCoords:win.blit(mountain,((tile[0]+mountainOffset[tile]),(tile[1])))
             for tile in treeCoords:win.blit(tree,((tile[0]+treeOffset[tile]),(tile[1])))
             win.blit(test,tileselected)
@@ -1326,13 +1348,13 @@ while True:
                             if num101.get_rect(top=worlds[0],left=48).collidepoint(game.mouse.get_pos()):
                                 Iconmus.play()
                                 path, dirs, files = next(os.walk(os.getcwd()+"/Saves/World"+worlds[1]))
-                                for thing in range(len(files)-2):
+                                for thing in range(len(files)-1):
                                     try:
                                         os.remove(os.getcwd()+"/Saves/World"+worlds[1]+"/data"+str(thing)+".pickle")
                                     except:
                                         pass
                                 path, dirs, files = next(os.walk(os.getcwd()+"/DataFiles"))
-                                for thing in range(len(files)-2):
+                                for thing in range(len(files)-1):
                                     with open(fileOpenType+"/data"+str(thing)+".pickle","rb") as pickle_in:
                                         fulllist = (pickle.load(pickle_in))
                                     with open("Saves/World"+worlds[1]+"/data"+str(thing)+".pickle","wb") as file:
