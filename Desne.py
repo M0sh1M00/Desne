@@ -14,14 +14,16 @@ game.display.set_icon(game.image.load("Images/Bar/earth2.png"))
 game.font.init()
 
 size40 = game.font.Font('Other/blockfont.ttf', 35)
+size30 = game.font.Font('Other/blockfont.ttf', 30)
 size18 = game.font.Font('Other/blockfont.ttf', 16)
 size15 = game.font.Font('Other/blockfont.ttf', 15)
+size13 = game.font.Font('Other/blockfont.ttf', 12)
 size120 = game.font.Font('Other/blockfont.ttf', 100)
 size80 = game.font.Font('Other/blockfont.ttf', 60)
-size20 = game.font.Font('Other/blockfont.ttf', 17)
-size17 = game.font.Font('Other/blockfont.ttf', 15)
+size17 = game.font.Font('Other/blockfont.ttf', 17)
+size25 = game.font.Font('Other/blockfont.ttf', 25)
 
-global year,minsize,maxsize,minrectgen,maxrectgen,chanceremove,chanceamount,maptype,fileOpenType,colorcodes,fullcolorlist,textcolor,rotations,allcities
+global year,minsize,maxsize,minrectgen,maxrectgen,chanceremove,chanceamount,maptype,fileOpenType,colorcodes,fullcolorlist,textcolor,rotations,allcities,beachtype
 
 textcolor = (253,253,150)
 textcolor = (253,213,10)
@@ -55,6 +57,7 @@ win = game.display.set_mode((screenWidth, screenHeight))
 game.display.set_caption("Desne")
 
 water = game.image.load("Images/Terrain/water.png")
+ocean = game.image.load("Images/Terrain/ocean.png")
 wave = game.image.load("Images/Terrain/wave.png")
 mountain = game.image.load("Images/Terrain/mountain.png")
 grass = game.image.load("Images/Terrain/grass.png")
@@ -64,6 +67,8 @@ grass4 = game.image.load("Images/Terrain/grass4.png")
 
 snow = game.image.load("Images/Terrain/snow.png")
 snowhalf1 = game.image.load("Images/Terrain/snowhalf1.png")
+snowhalf2 = game.image.load("Images/Terrain/snowhalf2.png")
+snowhalf3 = game.image.load("Images/Terrain/snowhalf3.png")
 snowcorner1 = game.image.load("Images/Terrain/snowcorner1.png")
 sand = game.image.load("Images/Terrain/desert.png")
 tree = game.image.load("Images/Terrain/tree.png")
@@ -76,7 +81,7 @@ vol5 = game.image.load("Images/Terrain/volcano5.png")
 vol6 = game.image.load("Images/Terrain/volcano6.png")
 
 mouse = game.image.load("Other/mouse.png")
-test = game.image.load("Other/test.png")
+test = game.image.load("Other/selected.png")
 
 bar = game.image.load("Images/Bar/bar.png")
 baroption1 = game.image.load("Images/Bar/baroption.png")
@@ -97,6 +102,15 @@ quest1 = game.image.load("Images/Bar/quest1.png")
 quest2 = game.image.load("Images/Bar/quest2.png")
 historychanger1 = game.image.load("Images/Bar/historychanger1.png")
 historychanger2 = game.image.load("Images/Bar/historychanger2.png")
+camera1 = game.image.load("Images/Bar/camera1.png")
+camera2 = game.image.load("Images/Bar/camera2.png")
+nocamera1 = game.image.load("Images/Bar/nocamera1.png")
+nocamera2 = game.image.load("Images/Bar/nocamera2.png")
+city1 = game.image.load("Images/Bar/city1.png")
+city2 = game.image.load("Images/Bar/city2.png")
+house1 = game.image.load("Images/Bar/house1.png")
+house2 = game.image.load("Images/Bar/house2.png")
+
 
 
 arrow1 = game.image.load("Images/Bar/arrow1.png")
@@ -458,8 +472,11 @@ class gen():
                 posCoastCoords.add(i)
 
 
+        beachtype = dict()
+        for tile in allCoords:
+            beachtype[tile] = random.choice([1,2,3])
 
-        return landCoords,seaCoords,allCoords,mountainCoords,snowCoords,grassCoords,desertCoords,treeCoords,posCoastCoords,posSpawnCoords,mountainOffset,treeOffset,volcanoCoords
+        return landCoords,seaCoords,allCoords,mountainCoords,snowCoords,grassCoords,desertCoords,treeCoords,posCoastCoords,posSpawnCoords,mountainOffset,treeOffset,volcanoCoords,beachtype
 class societygen():
     def spawning(posSpawnCoords,colorcodes):
         spawntile = random.choice(list(posSpawnCoords))
@@ -636,7 +653,7 @@ class sidebar():
         win.blit(bar1,((640,0)))
         bar2 = game.transform.rotate(bar, 90)
         win.blit(bar2,((640,320)))
-    def icons(turnamount,myalpha,savegame):
+    def icons(turnamount,myalpha,savegame,fancyview,displayCitiesButton):
         politicalicon2,treeicon2,bothicon2,num11,num51,num101
         values = [
         [myalpha,0,432,672,treeicon,treeicon2],
@@ -653,8 +670,14 @@ class sidebar():
 
         [False,True,48+48,672,quest1,quest2],
 
+        [fancyview,True,384,672+48,camera1,camera2],
+        [fancyview,False,384,672+48+48,nocamera1,nocamera2],
         [False,True,384,672,historychanger1,historychanger2],
+
         [False,True,384-48,672,mail1,mail2],
+
+        [displayCitiesButton,2,288,672,house1,house2],
+        [displayCitiesButton,3,288,720,city1,city2],
         ]
         for itemnum in range(len(values)):
 
@@ -677,7 +700,7 @@ class sidebar():
     def tribetext(civselected):
         if civselected != -1:
             try:
-                tribename = size40.render(bigpack[civselected][3], True, textcolor)
+                tribename = size30.render(bigpack[civselected][3], True, textcolor)
                 char1 = bigpack[civselected][2][0]
                 char1N = size18.render(char1, True, textcolor)
                 char2 = bigpack[civselected][2][1]
@@ -686,14 +709,39 @@ class sidebar():
                 char3N = size18.render(char3, True, textcolor)
                 gov = size18.render("Gov: "+bigpack[civselected][4], True, textcolor)
                 population = size18.render("Pop: "+str(bigpack[civselected][5]), True, textcolor)
-                win.blit(tribename,(640+16,16))
-                win.blit(char1N,(640+16,64+32))
-                win.blit(char2N,(640+16,64+48+32))
-                win.blit(char3N,(640+16,128+32+32))
-                win.blit(gov,(640+16,240))
-                win.blit(population,(640+16,288))
+                win.blit(tribename,(640+24,16))
+                win.blit(char1N,(640+24,64+32))
+                win.blit(char2N,(640+24,64+48+32))
+                win.blit(char3N,(640+24,128+32+32))
+                win.blit(gov,(640+24,240))
+                win.blit(population,(640+24,288))
             except:
                 civselected = -1
+    def landtext(tileselected):
+        type = "Null"
+        addition = "Null"
+        if tileselected in grassCoords:
+            type = "Plains"
+        if tileselected in desertCoords:
+            type = "Desert"
+        if tileselected in snowCoords:
+            type = "Tundra"
+        if tileselected in treeCoords:
+            addition = "Forested "
+        elif tileselected in mountainCoords:
+            addition = "Mountainous "
+        elif tileselected in actualVolcanoCoords:
+            addition = "Volcanic "
+        else:
+            addition = ""
+
+
+        x,y = other.findxy(tileselected[0],tileselected[1])
+        #thing = size18.render("Biome: "+type, True, textcolor)
+        #win.blit(size25.render("Biome", True, textcolor),(640+24,288+64+32))
+        win.blit(size13.render(addition+type, True, textcolor),(640+24,288+128))
+        win.blit(size13.render("("+str(int((x/16)+1))+" , "+str(int((y/16)+1))+")", True, textcolor),(640+24,288+128+32))
+
 class society():
     def soilfertility(mountainCoords,snowCoords,grassCoords,desertCoords,treeCoords):
         fertilityIndex = {}
@@ -781,7 +829,6 @@ class society():
                         win.blit(territoryC, ((tile[0]+(16-thicc),tile[1])))
     def getnews (forward,newselected):
         if forward == True:
-
             try:
                 newselected+=1
                 headline = allnews[newselected][0]
@@ -801,6 +848,16 @@ class society():
             for city in bigpack[itemnum][10]:
                 win.blit(cityorb,(city))
 class other():
+    def deletenonpickle(files):
+        newfile=list()
+        for file in files:
+            if ".pickle" in file:
+                newfile.append(file)
+            else:
+                pass
+                #files.remove(file)
+
+        return newfile
     def mousemovement(*inCreateMode):
         x = (game.mouse.get_pos())[0]
         y = (game.mouse.get_pos())[1]
@@ -811,7 +868,7 @@ class other():
             i+=16
         if (game.mouse.get_pos())[0] < 640 and (game.mouse.get_pos())[1] < 640 and (game.mouse.get_pos())[0] != 0 and (game.mouse.get_pos())[1] != 0:
             game.mouse.set_visible(False)
-            xy = size15.render(("X: "+ str(int(x/16)+1) + "  Y: "+ str(int(y/16)+1))   , True, (0, 0, 0))
+            xy = size15.render(("X: "+ str(int(x/16)+1) + "  Y: "+ str(int(y/16)+1))   , True, (textcolor))
             win.blit(xy,((0,640-16)))
             while x not in mynums:
                 x-=1
@@ -822,7 +879,7 @@ class other():
                 #win.blit(game.transform.rotate(inCreateMode[0],rotations[(x,y)]),((x,y)))
             win.blit(mouse,((x,y)))
         else:
-            xy = size15.render(( "X:      Y: ")   , True, (0, 0, 0))
+            xy = size15.render(( "X:      Y: ")   , True, (textcolor))
             win.blit(xy,((0,640-16)))
             game.mouse.set_visible(True)
     def findarea(Coords):
@@ -894,7 +951,7 @@ class other():
         else:
             return "false"
     def displayyr():
-        yeardisplay = size15.render(( "Year: "+str(year))   , True, (0, 0, 0))
+        yeardisplay = size15.render(( "Year: "+str(year))   , True, (textcolor))
         win.blit(yeardisplay,((640-64-16-16,640-16)))
     def turnsB(sizeCondition,condition,turnType,bigpack,itemnum,possibleTurns):
         if len((bigpack[itemnum])[0]) > sizeCondition:
@@ -963,6 +1020,8 @@ endGame = False
 turnamount = 1
 savegame = 0
 myalpha = 180
+fancyview = False
+displayCitiesButton = 2
 while True:
     while titleGameState == True:
         mainScreen = True
@@ -1122,8 +1181,8 @@ while True:
     if savegame == 0 and worldGameState == True:
         fileOpenType = "DataFiles"
         while gamereset == True:
-                landCoords,seaCoords,allCoords,mountainCoords,snowCoords,grassCoords,desertCoords,treeCoords,posCoastCoords,posSpawnCoords,mountainOffset,treeOffset,volcanoCoords = gen.finalgen()
-                Naturedata = [landCoords,seaCoords,allCoords,mountainCoords,snowCoords,grassCoords,desertCoords,treeCoords,posCoastCoords,posSpawnCoords,mountainOffset,treeOffset,volcanoCoords]
+                landCoords,seaCoords,allCoords,mountainCoords,snowCoords,grassCoords,desertCoords,treeCoords,posCoastCoords,posSpawnCoords,mountainOffset,treeOffset,volcanoCoords,beachtype = gen.finalgen()
+                Naturedata = [landCoords,seaCoords,allCoords,mountainCoords,snowCoords,grassCoords,desertCoords,treeCoords,posCoastCoords,posSpawnCoords,mountainOffset,treeOffset,volcanoCoords,beachtype]
                 ### NEED THESE VARS
                 fertilityIndex = society.soilfertility(mountainCoords,snowCoords,grassCoords,desertCoords,treeCoords)
                 year = 0
@@ -1153,6 +1212,7 @@ while True:
                 rotations = dict()
                 for tile in allCoords:
                     rotations[tile] = random.choice([0,90,180,360])
+
                 grasstype = dict()
                 for tile in grassCoords:
                     grasstype[tile] = random.choice([grass,grass2,grass3,grass4])
@@ -1173,7 +1233,9 @@ while True:
                 gamereset = False
     elif savegame > 0:
         path, dirs, files = next(os.walk(os.getcwd()+"/Saves/World"+str(savegame)))
-        maxyear =len(files)-3
+        files = other.deletenonpickle(files)
+        print(files)
+        maxyear =len(files)-1
         year = maxyear
         civselected = -1
         tileselected = (0,0)
@@ -1209,6 +1271,7 @@ while True:
                         mountainOffset = Naturedata[10]
                         treeOffset = Naturedata[11]
                         volcanoCoords = Naturedata[12]
+                        beachtype = Naturedata[13]
                         volcanoCoordsCopy=list()
                         for item in volcanoCoords:
                             volcanoCoordsCopy.append(item)
@@ -1227,6 +1290,18 @@ while True:
             if worldGameState == False:
                 titleGameState = True
                 break
+            if gameloops==0:
+                coastCoords=set()
+                oceanCoords=set()
+                for tile in seaCoords:
+                    if (tile[0]+16,tile[1]) not in landCoords and (tile[0],tile[1]+16) not in landCoords and (tile[0]-16,tile[1]) not in landCoords and (tile[0],tile[1]-16) not in landCoords and (tile[0]-16,tile[1]-16) not in landCoords and (tile[0]+16,tile[1]-16) not in landCoords and (tile[0]-16,tile[1]+16) not in landCoords and (tile[0]+16,tile[1]+16) not in landCoords and (tile[0]-32,tile[1]+16) not in landCoords and (tile[0]-32,tile[1]-16) not in landCoords and (tile[0]+32,tile[1]+16) not in landCoords and (tile[0]+32,tile[1]-16) not in landCoords and (tile[0]+16,tile[1]+32) not in landCoords and (tile[0]+16,tile[1]-32) not in landCoords and (tile[0]-16,tile[1]+32) not in landCoords and (tile[0]-16,tile[1]-32) not in landCoords and (tile[0],tile[1]-32) not in landCoords and (tile[0],tile[1]+32) not in landCoords and (tile[0]+32,tile[1]) not in landCoords and (tile[0]-32,tile[1]) not in landCoords:
+                        oceanCoords.add(tile)
+                    else:
+                        coastCoords.add(tile)
+                actualVolcanoCoords = set()
+                for volcano in volcanoCoords:
+                    actualVolcanoCoords.add(volcano[0])
+
             gameloops+=1
             ###LOADING IN THE ICONS AS WELL AS THE SIDEBARS
             civselected = -1
@@ -1235,16 +1310,20 @@ while True:
                     civselected = bigpack.index(pack)
             sidebar.right()
             sidebar.bottom()
-            sidebar.icons(turnamount,myalpha,savegame)
+            sidebar.icons(turnamount,myalpha,savegame,fancyview,displayCitiesButton)
             win.blit(button,(640,640,640+192,640+192))
 
             ### BLITTING THE MAIN TERRAIN ONTO THE MAP
-            for tile in seaCoords:win.blit(game.transform.rotate(water,rotations[tile]),(tile))
+            for tile in coastCoords:win.blit(game.transform.rotate(water,rotations[tile]),(tile))
+            for tile in oceanCoords:win.blit(game.transform.rotate(ocean,rotations[tile]),(tile))
             for tile in snowCoords:win.blit(game.transform.rotate(snow,rotations[tile]),(tile))
             for tile in grassCoords:win.blit(game.transform.rotate(grasstype[tile],rotations[tile]),(tile))
             for tile in desertCoords:win.blit(game.transform.rotate(sand,rotations[tile]),(tile))
-            if 1==1:
+            if fancyview==True:
                 for tile in snowCoords:
+                    if beachtype[tile]==1:beachpic=snowhalf1
+                    if beachtype[tile]==2:beachpic=snowhalf2
+                    if beachtype[tile]==3:beachpic=snowhalf3
                     if ((tile[0]+16,tile[1]-16)) in allCoords:
                         win.blit(game.transform.rotate(snowcorner1,270),(tile[0]+16,tile[1]-16))
                     if ((tile[0]+16,tile[1]+16)) in allCoords:
@@ -1255,13 +1334,13 @@ while True:
                         win.blit(game.transform.rotate(snowcorner1,90),(tile[0]-16,tile[1]+16))
 
                     if ((tile[0]+16,tile[1])) in allCoords:
-                        win.blit(game.transform.rotate(snowhalf1,270),(tile[0]+16,tile[1]))
+                        win.blit(game.transform.rotate(beachpic,270),(tile[0]+16,tile[1]))
                     if ((tile[0]-16,tile[1])) in allCoords:
-                        win.blit(game.transform.rotate(snowhalf1,90),(tile[0]-16,tile[1]))
+                        win.blit(game.transform.rotate(beachpic,90),(tile[0]-16,tile[1]))
                     if ((tile[0],tile[1]+16)) in allCoords:
-                        win.blit(game.transform.rotate(snowhalf1,180),(tile[0],tile[1]+16))
+                        win.blit(game.transform.rotate(beachpic,180),(tile[0],tile[1]+16))
                     if ((tile[0],tile[1]-16)) in allCoords:
-                        win.blit(game.transform.rotate(snowhalf1,360),(tile[0],tile[1]-16))
+                        win.blit(game.transform.rotate(beachpic,360),(tile[0],tile[1]-16))
 
             for tile in mountainCoords:win.blit(mountain,((tile[0]+mountainOffset[tile]),(tile[1])))
             for tile in treeCoords:win.blit(tree,((tile[0]+treeOffset[tile]),(tile[1])))
@@ -1278,8 +1357,11 @@ while True:
             society.displaytribes(myalpha,posSpawnCoords,bigpack)
             ###THE INFORMATION FOR THE TRIBES ON THE SIDEBAR *
             sidebar.tribetext(civselected)
+            sidebar.landtext(tileselected)
             ### CITIES
-            society.displaycities (bigpack)
+            if displayCitiesButton ==2:
+                society.displaycities (bigpack)
+            #else if
             ###CLICKING EVENTS
             keys = game.key.get_pressed()
             for event in game.event.get():
@@ -1316,6 +1398,19 @@ while True:
                     elif num101.get_rect(top=768,left=480).collidepoint(game.mouse.get_pos()):
                         Iconmus.play()
                         turnamount =10
+                    elif camera1.get_rect(top=672+48,left=384).collidepoint(game.mouse.get_pos()):
+                        Iconmus.play()
+                        fancyview=True
+                    elif nocamera1.get_rect(top=672+48+48,left=384).collidepoint(game.mouse.get_pos()):
+                        Iconmus.play()
+                        fancyview=False
+
+                    elif house1.get_rect(top=720-48,left=288).collidepoint(game.mouse.get_pos()):
+                        Iconmus.play()
+                        displayCitiesButton=2 #288,720
+                    elif city1.get_rect(top=720,left=288).collidepoint(game.mouse.get_pos()):
+                        Iconmus.play()
+                        displayCitiesButton=3
                     elif historychanger1.get_rect(top=672,left=384).collidepoint(game.mouse.get_pos()):
                         Iconmus.play()
                         delyear = maxyear-year
@@ -1348,13 +1443,16 @@ while True:
                             if num101.get_rect(top=worlds[0],left=48).collidepoint(game.mouse.get_pos()):
                                 Iconmus.play()
                                 path, dirs, files = next(os.walk(os.getcwd()+"/Saves/World"+worlds[1]))
-                                for thing in range(len(files)-1):
+                                files = other.deletenonpickle(files)
+                                for thing in range(len(files)):
                                     try:
                                         os.remove(os.getcwd()+"/Saves/World"+worlds[1]+"/data"+str(thing)+".pickle")
                                     except:
                                         pass
                                 path, dirs, files = next(os.walk(os.getcwd()+"/DataFiles"))
-                                for thing in range(len(files)-1):
+                                files = other.deletenonpickle(files)
+                                #print(files)
+                                for thing in range(len(files)):
                                     with open(fileOpenType+"/data"+str(thing)+".pickle","rb") as pickle_in:
                                         fulllist = (pickle.load(pickle_in))
                                     with open("Saves/World"+worlds[1]+"/data"+str(thing)+".pickle","wb") as file:
@@ -1598,6 +1696,7 @@ while True:
                 mountainOffset = Naturedata[10]
                 treeOffset = Naturedata[11]
                 volcanoCoords = Naturedata[12]
+                beachtype = Naturedata[13]
             other.mousemovement()
             other.displayyr()
             game.display.flip()
@@ -1611,9 +1710,14 @@ while True:
                 allnews = bigpack[civselected][9][:]
                 newselected = 0
                 #news1 = size18.render(str(bigpack[civselected][9][0]), True, textcolor)
-                headline = allnews[0][0]
-                story = wrapline(str(allnews[0][1]), size18, 700)
-
+                try:
+                    headline = allnews[0][0]
+                    story = wrapline(str(allnews[0][1]), size18, 700)
+                    isnews=True
+                except:
+                    headline = "There has been no news this week!"
+                    story = wrapline(str(""), size18, 700)
+                    isnews=False
                 bigearth = game.transform.scale(earth1, (208, 208))
                 bigearth2 = game.transform.scale(earth2, (208, 208))
                 bignewsarrow1 = game.transform.scale(newsarrow1, (208, 208))
@@ -1643,16 +1747,18 @@ while True:
             win.blit(titlerender,(32,32))
             for section in story:
                 amount+=16
-                render = size20.render(section, True, textcolor)
+                render = size17.render(section, True, textcolor)
                 win.blit(render,(32,amount))
             for event in game.event.get():
                 if event.type == game.MOUSEBUTTONDOWN:
                     if bignewsarrow1.get_rect(top=512,left=544).collidepoint(game.mouse.get_pos()):
                         Iconmus.play()
-                        headline,story,newselected = society.getnews(True,newselected)
+                        if isnews==True:
+                            headline,story,newselected = society.getnews(True,newselected)
                     if bignewsarrow1.get_rect(top=512,left=80).collidepoint(game.mouse.get_pos()):
                         Iconmus.play()
-                        headline,story,newselected = society.getnews(False,newselected)
+                        if isnews==True:
+                            headline,story,newselected = society.getnews(False,newselected)
                     if bigearth.get_rect(top=512,left=312).collidepoint(game.mouse.get_pos()):
                         Iconmus.play()
                         mainGameScreen=True
@@ -1793,13 +1899,14 @@ while True:
                         Naturedata = [landCoords,seaCoords,allCoords,
                         mountainCoords,snowCoords,grassCoords,desertCoords,
                         treeCoords,posCoastCoords,posSpawnCoords,mountainOffset,
-                        treeOffset,volcanoCoordsCopy]
+                        treeOffset,volcanoCoordsCopy,beachtype]
 
                     except:continue
 
 
                     path, dirs, files = next(os.walk(os.getcwd()+"/Saves/World1"))
-                    for thing in range(len(files)-2):
+                    files = other.deletenonpickle(files)
+                    for thing in range(len(files)-1):
                         try:
                             os.remove(os.getcwd()+"/Saves/World1/data"+str(thing)+".pickle")
                         except:
