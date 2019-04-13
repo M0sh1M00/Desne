@@ -51,8 +51,8 @@ names.remove(names[-1])
 popdiviser = 0
 
 game.mixer.init()
-#game.mixer.music.load('Audio/background.mp3')
-#game.mixer.music.play(-1)
+game.mixer.music.load('Audio/background.mp3')
+game.mixer.music.play(-1)
 Newmus = game.mixer.Sound('Audio/New.wav')
 Tribemus = game.mixer.Sound('Audio/Tribe.wav')
 Iconmus = game.mixer.Sound('Audio/Icon.wav')
@@ -1655,7 +1655,7 @@ while True:
                                                     datapack[0] = list(area)
                                                     #datapack[8] = random.choice(list(area))
                                                     bigpack[itemnum][0] = set(bigpack[itemnum][0])
-                                                    bigpack[itemnum][0] -= area
+                                                    bigpack[itemnum][0] -= set(area)
                                                     bigpack[itemnum][0] = list(bigpack[itemnum][0])
                                                     bigpack.append(datapack)
                                                     landchanged=False
