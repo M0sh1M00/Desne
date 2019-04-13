@@ -18,12 +18,13 @@ size30 = game.font.Font('Other/blockfont.ttf', 30)
 size18 = game.font.Font('Other/blockfont.ttf', 16)
 size15 = game.font.Font('Other/blockfont.ttf', 15)
 size13 = game.font.Font('Other/blockfont.ttf', 12)
-size120 = game.font.Font('Other/blockfont.ttf', 100)
+size100 = game.font.Font('Other/blockfont.ttf', 100)
+size85 = game.font.Font('Other/blockfont.ttf', 85)
 size80 = game.font.Font('Other/blockfont.ttf', 60)
 size17 = game.font.Font('Other/blockfont.ttf', 17)
 size25 = game.font.Font('Other/blockfont.ttf', 25)
 
-global year,minsize,maxsize,minrectgen,maxrectgen,chanceremove,chanceamount,maptype,fileOpenType,colorcodes,fullcolorlist,textcolor,rotations,allcities,beachtype
+global year,minsize,maxsize,minrectgen,maxrectgen,chanceremove,chanceamount,maptype,fileOpenType,colorcodes,fullcolorlist,textcolor,rotations,allcities,beachtype,names
 
 #textcolor = (253,253,150)
 textcolor = (253,213,10)
@@ -40,6 +41,12 @@ allcities = list()
 with open("TextFiles/cities.txt","r") as file:
     for line in file:
         allcities.append(line.rstrip("\n"))
+
+f = open("TextFiles/SocietyNames.txt","r")
+names = list()
+for line in f:
+    names.append(line.rstrip("\n"))
+names.remove(names[-1])
 
 popdiviser = 0
 
@@ -184,7 +191,7 @@ def wrapline(text, font, maxwidth):
 class menu():
     def title(word):
         win.blit(titleimg,((0,0)))
-        tit = size120.render(word, True, (200, 200, 200))
+        tit = size100.render(word, True, (200, 200, 200))
         win.blit(tit,(tit.get_rect(center=(416+16, 64))))
         #416 is important for center
     def bar(barOptions):
@@ -525,7 +532,7 @@ class gen():
 
         return landCoords,seaCoords,allCoords,mountainCoords,snowCoords,grassCoords,desertCoords,treeCoords,posCoastCoords,posSpawnCoords,mountainOffset,treeOffset,volcanoCoords,beachtype
 class societygen():
-    def spawning(posSpawnCoords,colorcodes):
+    def spawning(posSpawnCoords,colorcodes,names):
         spawntile = random.choice(list(posSpawnCoords))
 
         while spawntile not in posSpawnCoords:
@@ -583,21 +590,35 @@ class societygen():
                 societycharacteristics.append(currentchar)
                 charlist1.remove(charlist1[charlist2.index(currentchar)])
                 charlist2.remove(currentchar)
-        f = open("TextFiles/SocietyNames.txt","r")
-        names = list()
-        for line in f:
-            names.append(line.rstrip("\n"))
-        names.remove(names[-1])
-        part1 = random.choice(names)
-        names.remove(part1)
-        part2 = random.choice(names)
+        #try:
+        if len(names) > 2:
+            part1 = random.choice(names)
+            part2 = random.choice(names)
+            while part2 == part1:
+                part2 = random.choice(names)
+            names.remove(part1)
+            names.remove(part2)
+        else:
+            f = open("TextFiles/SocietyNames.txt","r")
+            names = list()
+            for line in f:
+                names.append(line.rstrip("\n"))
+            f.close()
+            names.remove(names[-1])
+            part1 = random.choice(names)
+            part2 = random.choice(names)
+            while part2 == part1:
+                part2 = random.choice(names)
+            #print(part1,part2)
+            names.remove(part1)
+            names.remove(part2)
+
         name = part1+part2
-        f.close()
         name = name[0].upper()+name[1:]
         if year == 0:
             governmenttype = "Chieftan"
         else:
-            governmenttype = "Provisional"
+            governmenttype = "Interm Government"
         pop = 0
         #pop = society.populationcalc([spawntile],fertilityIndex)
         #print(pop)
@@ -771,6 +792,9 @@ class sidebar():
                 win.blit(population,(640+24,288))
             except:
                 civselected = -1
+    #def worldtext():
+
+
     def landtext(tileselected):
         type = "Null"
         addition = "Null"
@@ -942,9 +966,18 @@ class other():
             game.mouse.set_visible(True)
     def findarea(Coords):
         ranTile = random.choice(list(Coords))
+        for i in range(200):
+            if ((ranTile[0]+16,ranTile[1])) in seaCoords or ((ranTile[0]-16,ranTile[1])) in seaCoords or ((ranTile[0],ranTile[1]+16)) in seaCoords or ((ranTile[0],ranTile[1]-16)) in seaCoords:
+                pass
+            else:
+                ranTile = random.choice(list(Coords))
+        if ((ranTile[0]+16,ranTile[1])) in seaCoords or ((ranTile[0]-16,ranTile[1])) in seaCoords or ((ranTile[0],ranTile[1]+16)) in seaCoords or ((ranTile[0],ranTile[1]-16)) in seaCoords:
+            pass
+        else:
+            return Coords
         area = {(ranTile)}
         temp = set()
-        for i in range( len(Coords) ):
+        for i in range(int( random.randint(5,15))):#len(Coords)/3) ):
             for tile in area:
                 for num in range(8):
                     xplus= 0
@@ -959,7 +992,12 @@ class other():
                         yplus = 16
 
                     if ((tile[0]+xplus,tile[1]+yplus)) in Coords and ((tile[0]+xplus,tile[1]+yplus)) not in area:
-                        temp.add(((tile[0]+xplus,tile[1]+yplus)))
+                        if random.randint(1,5) > 3:
+                            if num >4:
+                                if random.randint(1,5) > 3:
+                                    temp.add(((tile[0]+xplus,tile[1]+yplus)))
+                            else:
+                                temp.add(((tile[0]+xplus,tile[1]+yplus)))
 
             for tile in temp:
                 area.add(tile)
@@ -1243,6 +1281,32 @@ while True:
                 Naturedata = [landCoords,seaCoords,allCoords,mountainCoords,snowCoords,grassCoords,desertCoords,treeCoords,posCoastCoords,posSpawnCoords,mountainOffset,treeOffset,volcanoCoords,beachtype]
                 ### NEED THESE VARS
                 fertilityIndex = society.soilfertility(mountainCoords,snowCoords,grassCoords,desertCoords,treeCoords)
+
+
+                if len(names) > 2:
+                    part1 = random.choice(names)
+                    part2 = random.choice(names)
+                    while part2 == part1:
+                        part2 = random.choice(names)
+                    names.remove(part1)
+                    names.remove(part2)
+                else:
+                    f = open("TextFiles/SocietyNames.txt","r")
+                    names = list()
+                    for line in f:
+                        names.append(line.rstrip("\n"))
+                    f.close()
+                    names.remove(names[-1])
+                    part1 = random.choice(names)
+                    part2 = random.choice(names)
+                    while part2 == part1:
+                        part2 = random.choice(names)
+                    #print(part1,part2)
+                    names.remove(part1)
+                    names.remove(part2)
+                WorldName = part1+part2
+                WorldName = WorldName[0].upper()+WorldName[1:]
+
                 year = 0
                 maxyear = 0
                 civselected = -1
@@ -1252,7 +1316,7 @@ while True:
                 bigpack = list()
                 colorcodes = fullcolorlist[:]
                 for i in range(random.randint(3,7)):
-                    datapack,posSpawnCoords = societygen.spawning(posSpawnCoords,colorcodes)
+                    datapack,posSpawnCoords = societygen.spawning(posSpawnCoords,colorcodes,names)
                     bigpack.append(datapack)
                 ### FIRST EXPANSION
                 for i in range(10):
@@ -1292,7 +1356,7 @@ while True:
     elif savegame > 0:
         path, dirs, files = next(os.walk(os.getcwd()+"/Saves/World"+str(savegame)))
         files = other.deletenonpickle(files)
-        print(files)
+        #print(files)
         maxyear =len(files)-1
         year = maxyear
         civselected = -1
@@ -1378,11 +1442,14 @@ while True:
             ### BLITTING THE MAIN TERRAIN ONTO THE MAP
             for tile in coastCoords:win.blit(game.transform.rotate(water,rotations[tile]),(tile))
             for tile in oceanCoords:win.blit(game.transform.rotate(ocean,rotations[tile]),(tile))
+
+            for tile in desertCoords:win.blit(game.transform.rotate(sand,rotations[tile]),(tile))
+
             for tile in grassCoords:win.blit(game.transform.rotate(grasstype[tile],rotations[tile]),(tile))
             if fancyview==True: gen.fancytiles(grassCoords,beachtype)#and myalpha!=1000
             for tile in snowCoords:win.blit(game.transform.rotate(snow,rotations[tile]),(tile))
             if fancyview==True: gen.fancytiles(snowCoords,beachtype)
-            for tile in desertCoords:win.blit(game.transform.rotate(sand,rotations[tile]),(tile))
+
 
 
             for tile in mountainCoords:win.blit(mountain,((tile[0]+mountainOffset[tile]),(tile[1])))
@@ -1500,6 +1567,8 @@ while True:
                                 path, dirs, files = next(os.walk(os.getcwd()+"/DataFiles"))
                                 files = other.deletenonpickle(files)
                                 #print(files)
+
+                                #print(files)
                                 for thing in range(len(files)):
                                     with open(fileOpenType+"/data"+str(thing)+".pickle","rb") as pickle_in:
                                         fulllist = (pickle.load(pickle_in))
@@ -1529,10 +1598,13 @@ while True:
 
                                 if 1==1:
                                     for itemnum in range(len(bigpack)):
+
                                         try:
                                             bigpack[itemnum]
                                         except:
                                             continue
+                                        if len(bigpack[itemnum][0])==0:
+                                            bigpack.remove(bigpack[itemnum])
                                         ###BASE POPULATION CHANGE
                                         if random.randint(1,4) != 1:
                                             ###INCREASE
@@ -1574,20 +1646,50 @@ while True:
                                             ### Rebelion
                                             civgot = other.findbordercountries(bigpack[itemnum],bigpack)
                                             whathappens = random.randint(1,30)
-                                            if whathappens ==1:
+                                            if whathappens ==1 or whathappens ==2:
                                                 area = other.findarea(bigpack[itemnum][0])
+                                                #print("attempted rev")
                                                 if bigpack[itemnum][8] not in area:
                                                     #if len(area) > 5:
-                                                    datapack,area = societygen.spawning(area,colorcodes)
+                                                    datapack,area = societygen.spawning(area,colorcodes,names)
                                                     datapack[0] = list(area)
-                                                    datapack[8] = random.choice(list(area))
+                                                    #datapack[8] = random.choice(list(area))
                                                     bigpack[itemnum][0] = set(bigpack[itemnum][0])
                                                     bigpack[itemnum][0] -= area
                                                     bigpack[itemnum][0] = list(bigpack[itemnum][0])
                                                     bigpack.append(datapack)
+                                                    landchanged=False
+                                                    while landchanged==False:
+                                                        for tile in bigpack[itemnum][0]:
+                                                            if (tile[0]+16,tile[1]) not in bigpack[itemnum][0] and (tile[0]-16,tile[1]) not in bigpack[itemnum][0] and (tile[0],tile[1]+16) not in bigpack[itemnum][0] and (tile[0],tile[1]-16) not in bigpack[itemnum][0]:
+                                                                ## if tile isnt in the avalable tiles north south east and west
+                                                                if (tile[0]+16,tile[1]) not in posSpawnCoords and (tile[0]-16,tile[1]) not in posSpawnCoords and (tile[0],tile[1]+16) not in posSpawnCoords and (tile[0],tile[1]-16) not in posSpawnCoords:
+                                                                    bigpack[itemnum][0].remove(tile)
+                                                                    posSpawnCoords.add(tile)
+                                                                    for i in bigpack:
+                                                                        if tile in posSpawnCoords:
+                                                                            if (tile[0]+16,tile[1]) in i[0]:
+                                                                                 i[0].append(tile)
+                                                                                 posSpawnCoords.remove(tile)
+                                                                                 landchanged=True
+
+                                                                            elif (tile[0]-16,tile[1]) in i[0]:
+                                                                                 i[0].append(tile)
+                                                                                 posSpawnCoords.remove(tile)
+                                                                                 landchanged=True
+                                                                            elif (tile[0],tile[1]+16) in i[0]:
+                                                                                 i[0].append(tile)
+                                                                                 posSpawnCoords.remove(tile)
+                                                                                 landchanged=True
+                                                                            elif (tile[0],tile[1]-16) in i[0]:
+                                                                                 i[0].append(tile)
+                                                                                 posSpawnCoords.remove(tile)
+                                                                                 landchanged=True
+                                                        landchanged=True
+
                                             if civgot != "false":
 
-                                                if whathappens == 2 and len(bigpack[itemnum][0]) <= random.randint(50,100) and len(bigpack[civgot][0]) <= random.randint(50,100):
+                                                if whathappens == 3 and len(bigpack[itemnum][0]) <= random.randint(50,100) and len(bigpack[civgot][0]) <= random.randint(50,100):
                                                     deleteevents.append([civgot,itemnum,"merge"])
 
 
@@ -1614,7 +1716,7 @@ while True:
                                         ### SECONDARY
                                         if random.randint(1,5) == 1:
 
-                                            if ((bigpack[itemnum])[4] == "Chieftan" or (bigpack[itemnum])[4] == "Provisional")and len((bigpack[itemnum])[0]) > 20:
+                                            if ((bigpack[itemnum])[4] == "Chieftan" or (bigpack[itemnum])[4] == "Interm Government")and len((bigpack[itemnum])[0]) > 20:
                                                 newsstuff.append("proclamation")
 
                                                 govs = list()
@@ -1667,7 +1769,7 @@ while True:
 
                                         civgot = deleteeventdoing[1]
                                         itemnum = deleteeventdoing[0]
-                                        newdatapack,area = societygen.spawning(bigpack[itemnum][0][:],colorcodes)
+                                        newdatapack,area = societygen.spawning(bigpack[itemnum][0][:],colorcodes,names)
                                         if random.randint(1,2) == 1:
                                             if random.randint(1,2) ==1:
                                                 newdatapack[3] = bigpack[civgot][3]
@@ -1837,26 +1939,46 @@ while True:
                 win.blit(bigmail,((0,624)))
 
 
+            #datapack = [[spawntile],color,societycharacteristics,name,governmenttype,pop,military,citzensatisfaction,spawntile,news,cities]
+
+            Char = size18.render("Characteristics:", True, textcolor)
+            TribeChar1 = size18.render(bigpack[civselected][2][0], True, textcolor)
+            TribeChar2 = size18.render(bigpack[civselected][2][1], True, textcolor)
+            TribeChar3 = size18.render(bigpack[civselected][2][2], True, textcolor)
+
+            TribeGov = size18.render("Government of "+bigpack[civselected][3]+": "+bigpack[civselected][4], True, textcolor)
+
+            TribePop = size18.render("Population of "+bigpack[civselected][3]+": "+str(bigpack[civselected][5]), True, textcolor)
+
+            TribeMil = size18.render("Military Strength of "+bigpack[civselected][3]+": "+str(bigpack[civselected][6])+"%", True, textcolor)
+
+            TribeSat = size18.render("Citzen Satisfaction of "+bigpack[civselected][3]+": "+str(bigpack[civselected][7])+"%", True, textcolor)
 
 
+            TribeCap = size18.render("Capital of "+bigpack[civselected][3]+": "+ bigpack[civselected][10][bigpack[civselected][8]] +" ("+ str(int(bigpack[civselected][8][0]/16)+1) +" , "+ str(int(bigpack[civselected][8][1]/16)+1)+")"   , True, textcolor)
 
-            char1 = bigpack[civselected][2][0]
-            char1N = size18.render(char1, True, textcolor)
-            char2 = bigpack[civselected][2][1]
-            char2N = size18.render(char2, True, textcolor)
-            char3 = bigpack[civselected][2][2]
-            char3N = size18.render(char3, True, textcolor)
-            gov = size18.render("Gov: "+bigpack[civselected][4], True, textcolor)
-            population = size18.render("Pop: "+str(bigpack[civselected][5]), True, textcolor)
+            TribeLand = size18.render("Amount of Land in "+bigpack[civselected][3]+": "+str(len(bigpack[civselected][0])), True, textcolor)
 
-
-
-            TribeName = size120.render(bigpack[civselected][3], True, textcolor)
+            TribeCity = size18.render("Amount of Cities in "+bigpack[civselected][3]+": "+str(len(bigpack[civselected][10])), True, textcolor)
+            #TribeSat = size18.render("Citzen Satisfaction of "+bigpack[civselected][3]+": "+str(bigpack[civselected][7])+"%", True, textcolor)
+            #print(bigpack[civselected][10])
+            TribeName = size40.render(bigpack[civselected][4]+" of "+bigpack[civselected][3], True, textcolor)
             TribeName_rect = TribeName.get_rect(center=(screenWidth/2,64))
             #win.blit(TribeName,(32,32))
             ###Tribe Name
             win.blit(TribeName, TribeName_rect)
-            #win.blit(char1N,(640+24,64+32))
+
+            win.blit(TribePop,(64,128))
+
+            win.blit(TribeMil,(64,128+48))
+
+            win.blit(TribeGov,(64,128+48+48))
+
+            win.blit(TribeSat,(64,128+48+48+48))
+
+            win.blit(TribeCap,(64,128+48+48+48+48))
+            win.blit(TribeLand,(64,128+48+48+48+48+48))
+            win.blit(TribeCity,(64,128+48+48+48+48+48+48))
             #win.blit(char2N,(640+24,64+48+32))
             #win.blit(char3N,(640+24,128+32+32))
             #win.blit(gov,(640+24,240))
@@ -1994,7 +2116,7 @@ while True:
                     bigpack=list()
                     posSpawnCoords = grassCoords|snowCoords|desertCoords
                     for i in range(random.randint(3,7)):
-                        datapack,posSpawnCoords = societygen.spawning(posSpawnCoords,colorcodes)
+                        datapack,posSpawnCoords = societygen.spawning(posSpawnCoords,colorcodes,names)
                         bigpack.append(datapack)
                     ### FIRST EXPANSION
                     for i in range(10):
@@ -2040,7 +2162,7 @@ while True:
                 bigpack=list()
                 posSpawnCoords = grassCoords|snowCoords|desertCoords
                 for i in range(random.randint(3,7)):
-                    datapack,posSpawnCoords = societygen.spawning(posSpawnCoords,colorcodes)
+                    datapack,posSpawnCoords = societygen.spawning(posSpawnCoords,colorcodes,names)
                     bigpack.append(datapack)
                 ### FIRST EXPANSION
                 for i in range(10):
@@ -2058,9 +2180,12 @@ while True:
         for tile in seaCoords:win.blit(game.transform.rotate(water,rotations[tile]),(tile))
         for tile in snowCoords:win.blit(game.transform.rotate(snow,rotations[tile]),(tile))
         gen.fancytiles(snowCoords,beachtype)
+
+        for tile in desertCoords:win.blit(game.transform.rotate(sand,rotations[tile]),(tile))
+
         for tile in grassCoords:win.blit(game.transform.rotate(grass,rotations[tile]),(tile))
         gen.fancytiles(grassCoords,beachtype)
-        for tile in desertCoords:win.blit(game.transform.rotate(sand,rotations[tile]),(tile))
+
         for tile in mountainCoords:win.blit(mountain,((tile[0]+mountainOffset[tile]),(tile[1])))
         for tile in treeCoords:win.blit(tree,((tile[0]+treeOffset[tile]),(tile[1])))
         for tile in volcanoCoords:win.blit(game.transform.rotate(vol1,360),(tile))

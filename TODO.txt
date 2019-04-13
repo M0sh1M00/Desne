@@ -1,8 +1,11 @@
 News
 Wars
-Reset All History Button
+Reset All History Button, recreate new tribes on world?
 Worldwide events:
 	Plague
 	Land reclmation?
 Add More nature things:
 	Craters
+Add specialty to traits
+Leaders?
+
