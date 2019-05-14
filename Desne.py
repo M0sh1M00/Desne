@@ -1163,12 +1163,16 @@ class other():
                 else:
                     return bigpack
         except:
-            bigpack[civ1][11][0] = -1
-            bigpack[civ2][11][0] = -1
-            bigpack[civ1][11][2] = 0
-            bigpack[civ2][11][2] = 0
-            bigpack[civ1][11][3] = 1
-            bigpack[civ2][11][3] = 1
+            try:
+                bigpack[civ1][11][0] = -1
+                bigpack[civ2][11][0] = -1
+                bigpack[civ1][11][2] = 0
+                bigpack[civ2][11][2] = 0
+                bigpack[civ1][11][3] = 1
+                bigpack[civ2][11][3] = 1
+            except:
+                ###GO HERE IF AN ENTIRE COUNTRY IS DEFEATED
+                pass
             return bigpack
     def findbordertile(bigpack,civ1,civ2):
         atiles =list()
