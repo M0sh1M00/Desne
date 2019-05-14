@@ -1,5 +1,0 @@
-Fixed the color bug (where multiple tribes can be the same color)
-Added News events for many things
-Added Cities
-Added Citizen Satisfaction
-Added A reset history button

@@ -1,0 +1,5 @@
+Added city name display
+Revolution can now happen on the same continent as the host country
+Added wars
+Many bug fixes
+Majorly fixed much of the News system, now new news can be added easily

@@ -9,6 +9,9 @@ import time
 from ast import literal_eval
 from itertools import chain
 
+LEFT = 1
+RIGHT = 3
+
 game.init()
 game.display.set_icon(game.image.load("Images/Bar/earth2.png"))
 game.font.init()
@@ -51,17 +54,20 @@ names.remove(names[-1])
 popdiviser = 0
 
 game.mixer.init()
-game.mixer.music.load('Audio/background.mp3')
-game.mixer.music.play(-1)
+#game.mixer.music.load('Audio/background.mp3')
+#game.mixer.music.play(-1)
 Newmus = game.mixer.Sound('Audio/New.wav')
 Tribemus = game.mixer.Sound('Audio/Tribe.wav')
 Iconmus = game.mixer.Sound('Audio/Icon.wav')
 
-screenWidth = 640+320-128
-screenHeight = 640+320-128
+screenWidth = 838
+screenHeight = 838
 
-win = game.display.set_mode((screenWidth, screenHeight))
-game.display.set_caption("Desne")
+#win = game.display.set_mode((screenWidth, screenHeight))
+win = game.display.set_mode((screenHeight,screenWidth))
+game.display.set_caption("Desne", "Desne")
+#game.display.set_caption("title", icontitle=None) #-> None
+
 
 water = game.image.load("Images/Terrain/water.png")
 ocean = game.image.load("Images/Terrain/ocean.png")
@@ -239,7 +245,6 @@ class gen():
                 win.blit(game.transform.rotate(landdictionary[beachtype[(tile[0],tile[1]+16)]],180),(tile[0],tile[1]+16))
             if ((tile[0],tile[1]-16)) in allCoords:
                 win.blit(game.transform.rotate(landdictionary[beachtype[(tile[0],tile[1]-16)]],360),(tile[0],tile[1]-16))
-
     def allTiles():
         allCoords = set()
         i = 640-16
@@ -622,7 +627,7 @@ class societygen():
         pop = 0
         #pop = society.populationcalc([spawntile],fertilityIndex)
         #print(pop)
-        military = 10 #K
+        military = random.randint(0,5) #K
 
         citzensatisfaction = random.randint(60,90) #percent
         news=list()
@@ -635,7 +640,11 @@ class societygen():
                 for line in file:
                     allcities.append(line.rstrip("\n"))
             cities[spawntile] = random.choice(allcities)
-        datapack = [[spawntile],color,societycharacteristics,name,governmenttype,pop,military,citzensatisfaction,spawntile,news,cities]
+        #create civilization
+        #war = [with who,with who 2,turns since started,win battle chance (use randint), has taken turn yet]
+        war = [-1,0,0,0]
+
+        datapack = [[spawntile],color,societycharacteristics,name,governmenttype,pop,military,citzensatisfaction,spawntile,news,cities,war]
         return datapack,posSpawnCoords
     def expand(datapack,posSpawnCoords,seaCoords):
         allTiles = datapack[0]
@@ -736,7 +745,13 @@ class sidebar():
         [savegame,2,48,720,greenfloppy1,greenfloppy2,True],
         [savegame,3,48,768,bluefloppy1,bluefloppy2,True],
 
-        [False,True,48+48,672,quest1,quest2,True],
+        #[False,True,48+48,672,quest1,quest2,True],
+        #32
+        #52
+        #20
+        #192
+        #640
+        [False,True,640+(int(192/2)-16) ,640-48,quest1,quest2,True],
 
         [fancyview,True,384,672+48,camera1,camera2,True],
         [fancyview,False,384,672+48+48,nocamera1,nocamera2,True],
@@ -782,7 +797,12 @@ class sidebar():
                 char2N = size18.render(char2, True, textcolor)
                 char3 = bigpack[civselected][2][2]
                 char3N = size18.render(char3, True, textcolor)
-                gov = size18.render("Gov: "+bigpack[civselected][4], True, textcolor)
+
+
+                if bigpack[civselected][4] == "Interm Government":
+                    gov = size18.render("Gov: Interm", True, textcolor)
+                else:
+                    gov = size18.render("Gov: "+bigpack[civselected][4], True, textcolor)
                 population = size18.render("Pop: "+str(bigpack[civselected][5]), True, textcolor)
                 win.blit(tribename,(640+24,16))
                 win.blit(char1N,(640+24,64+32))
@@ -804,6 +824,10 @@ class sidebar():
             type = "Desert"
         if tileselected in snowCoords:
             type = "Tundra"
+        if tileselected in seaCoords:
+            type = "Coast"
+        if tileselected in oceanCoords:
+            type = "Ocean"
         if tileselected in treeCoords:
             addition = "Forested "
         elif tileselected in mountainCoords:
@@ -818,8 +842,12 @@ class sidebar():
         #thing = size18.render("Biome: "+type, True, textcolor)
         #win.blit(size25.render("Biome", True, textcolor),(640+24,288+64+32))
         win.blit(size13.render(addition+type, True, textcolor),(640+24,288+128))
-        win.blit(size13.render("("+str(int((x/16)+1))+" , "+str(int((y/16)+1))+")", True, textcolor),(640+24,288+128+32))
+        win.blit(size13.render("Coords: ("+str(int((x/16)+1))+" , "+str(int((y/16)+1))+")", True, textcolor),(640+24,288+128+32))
 
+        try:
+            win.blit(size13.render("City: "+bigpack[civselected][10][(tileselected[0],tileselected[1])], True, textcolor),(640+24,288+128+32+32))
+        except:
+            pass
 class society():
     def soilfertility(mountainCoords,snowCoords,grassCoords,desertCoords,treeCoords):
         fertilityIndex = {}
@@ -1049,6 +1077,120 @@ class other():
     def displayyr():
         yeardisplay = size15.render(( "Year: "+str(year))   , True, (textcolor))
         win.blit(yeardisplay,((640-64-16-16,640-16)))
+    def warturn(bigpack,civ1):
+        civ2 = bigpack[civ1][11][0]
+        try:
+            #war = [with who,turns since started,win battle chance (use randint),has taken turn yet]  11 name is 3
+
+            #0 is now who they are vsing
+            #1 is the turns the battle, starts high
+            #2 chance, should be calucted using random
+            #3 have they taken turn yet
+
+
+            if bigpack[civ1][11][0] == -1:
+
+                #bigpack[civ1][11][1] = -1
+
+                return bigpack
+            else:
+                if bigpack[civ1][11][3] == 0 and bigpack[civ2][11][3] == 0:
+
+                    bigpack[civ1][11][2]=random.randint(1,10)
+                    bigpack[civ2][11][2]=random.randint(1,10)
+
+
+
+                    for i in range(random.randint(1,3)):
+                        if bigpack[civ1][11][2]==bigpack[civ2][11][2]:
+                            #print("no land changed")
+                            pass
+                        elif bigpack[civ1][11][2]>bigpack[civ2][11][2]:
+                            #print(bigpack[civ1][3]+" won")
+                            tilegot = other.findbordertile(bigpack,civ1,civ2)
+                            if tilegot == -1:
+                                continue
+                            bigpack[civ2][0].remove(tilegot)
+
+                            bigpack[civ1][0].append(tilegot)
+                            for tile in bigpack[civ2][0]:
+                                if ((tile[0]-16,tile[1])) in bigpack[civ1][0] and ((tile[0]+16,tile[1])) in bigpack[civ1][0] and ((tile[0],tile[1]-16)) in bigpack[civ1][0] and ((tile[0],tile[1]+16)) in bigpack[civ1][0]:
+                                    bigpack[civ2][0].remove(tile)
+                                    bigpack[civ1][0].append(tile)
+                            #if tilegot in bigpack[civ1][0] and tilegot in bigpack[civ2][0]:
+                            #    print("wtf")
+                            #    bigpack[civ2][0].remove(tilegot)
+
+                        elif bigpack[civ1][11][2]<bigpack[civ2][11][2]:
+                            #print(bigpack[civ2][3]+" won")
+                            tilegot = other.findbordertile(bigpack,civ2,civ1)
+                            if tilegot == -1:
+                                continue
+                            bigpack[civ1][0].remove(tilegot)
+
+                            bigpack[civ2][0].append(tilegot)
+                            for tile in bigpack[civ1][0]:
+                                if ((tile[0]-16,tile[1])) in bigpack[civ2][0] and ((tile[0]+16,tile[1])) in bigpack[civ2][0] and ((tile[0],tile[1]-16)) in bigpack[civ2][0] and ((tile[0],tile[1]+16)) in bigpack[civ2][0]:
+                                    bigpack[civ1][0].remove(tile)
+                                    bigpack[civ2][0].append(tile)
+                            #if tilegot in bigpack[civ1][0] and tilegot in bigpack[civ2][0]:
+                            #    print("wtf")
+                            #    bigpack[civ1][0].remove(tilegot)
+
+
+                    try:
+                        #print("tile got is: " +  str(int( (tilegot[0]/16)+1  ))+","+str(int(   (tilegot[1]/16)+1  )))
+                        pass
+
+                        #if tilegot in bigpack[civ1][0] and tilegot in bigpack[civ2][0]:
+                        #    print("wtf")
+                    except:
+                        pass
+                    #print("  ")
+                    bigpack[civ1][11][1]-=1
+                    bigpack[civ2][11][1]-=1
+                    #print(bigpack[civ1][3]+" turns: "+str(bigpack[civ1][11][1]))
+                    #print(bigpack[civ2][3]+" turns: "+str(bigpack[civ2][11][1]))
+
+                    if bigpack[civ1][11][1] == 0 and bigpack[civ2][11][1] == 0:
+                        bigpack[civ1][11][0]=-1
+                        bigpack[civ2][11][0]=-1
+
+
+                    bigpack[civ1][11][3]=1
+                    bigpack[civ2][11][3]=1
+                    return bigpack
+                else:
+                    return bigpack
+        except:
+            bigpack[civ1][11][0] = -1
+            bigpack[civ2][11][0] = -1
+            bigpack[civ1][11][2] = 0
+            bigpack[civ2][11][2] = 0
+            bigpack[civ1][11][3] = 1
+            bigpack[civ2][11][3] = 1
+            return bigpack
+    def findbordertile(bigpack,civ1,civ2):
+        atiles =list()
+        for tile in bigpack[civ1][0]:
+
+            if ((tile[0]-16,tile[1])) in bigpack[civ2][0]:
+                atiles.append((tile[0]-16,tile[1]))
+
+            if ((tile[0]+16,tile[1])) in bigpack[civ2][0]:
+                atiles.append((tile[0]+16,tile[1]))
+
+            if ((tile[0],tile[1]-16)) in bigpack[civ2][0]:
+                atiles.append((tile[0],tile[1]-16))
+
+            if ((tile[0],tile[1]+16)) in bigpack[civ2][0]:
+                atiles.append((tile[0],tile[1]+16))
+        if atiles:
+            return random.choice(atiles)
+        else:
+            return -1
+
+
     def turnsB(sizeCondition,condition,turnType,bigpack,itemnum,possibleTurns):
         if len((bigpack[itemnum])[0]) > sizeCondition:
             for i in range(condition):
@@ -1131,7 +1273,7 @@ while True:
             menu.bar(mainScreenOptions)
 
             for event in game.event.get():
-                if event.type == game.MOUSEBUTTONDOWN:
+                if event.type == game.MOUSEBUTTONDOWN and event.button == LEFT:
                         if baroption1.get_rect(top=(160),left=(256)).collidepoint(event.pos):
                             Newmus.play()
                             savegame = 0
@@ -1165,7 +1307,7 @@ while True:
             menu.title("World Options")
             menu.bar(worldChoiceScreenOptions)
             for event in game.event.get():
-                if event.type == game.MOUSEBUTTONDOWN:
+                if event.type == game.MOUSEBUTTONDOWN and event.button == LEFT:
                         if baroption1.get_rect(top=(160),left=(256)).collidepoint(event.pos):
                             Newmus.play()
                             minsize = 8#6
@@ -1218,7 +1360,7 @@ while True:
             menu.title("Saves")
             menu.bar(mainScreenOptions)
             for event in game.event.get():
-                if event.type == game.MOUSEBUTTONDOWN:
+                if event.type == game.MOUSEBUTTONDOWN and event.button == LEFT:
                         if baroption1.get_rect(top=(160),left=(256)).collidepoint(event.pos):
                             Newmus.play()
                             savegame = 1
@@ -1316,6 +1458,7 @@ while True:
                 bigpack = list()
                 colorcodes = fullcolorlist[:]
                 for i in range(random.randint(3,7)):
+                #for i in range(random.randint(3,7)):
                     datapack,posSpawnCoords = societygen.spawning(posSpawnCoords,colorcodes,names)
                     bigpack.append(datapack)
                 ### FIRST EXPANSION
@@ -1476,7 +1619,7 @@ while True:
             ###CLICKING EVENTS
             keys = game.key.get_pressed()
             for event in game.event.get():
-                if event.type == game.MOUSEBUTTONDOWN:
+                if event.type == game.MOUSEBUTTONDOWN and event.button == LEFT:
 
                     ###ICONS
                     for pack in bigpack:
@@ -1532,7 +1675,8 @@ while True:
                                 print("error, something might be wrong")
                                 pass
                         maxyear=year
-                    elif quest1.get_rect(top=672,left=48+48).collidepoint(game.mouse.get_pos()):
+                    #640+(int(192/2)-16) ,640-48
+                    elif quest1.get_rect(top=640-48,left=640+(int(192/2)-16)).collidepoint(game.mouse.get_pos()):
                         Iconmus.play()
                         if savegame != 0:
                             savegame = 0
@@ -1595,7 +1739,13 @@ while True:
                                 deleteevents = list()
                                 year+=1
                                 maxyear = year
+                                ###RESET WAR TURNS
+                                #for thing in bigpack
+                                for thing in range(len(bigpack)):
+                                    bigpack[thing][11][3]=0
 
+                                    bigpack[thing][0] = set(bigpack[thing][0])
+                                    bigpack[thing][0] = list(bigpack[thing][0])
                                 if 1==1:
                                     for itemnum in range(len(bigpack)):
 
@@ -1603,9 +1753,17 @@ while True:
                                             bigpack[itemnum]
                                         except:
                                             continue
-                                        if len(bigpack[itemnum][0])==0:
+
+
+                                        if len(bigpack[itemnum][0])==False:
                                             bigpack.remove(bigpack[itemnum])
                                         ###BASE POPULATION CHANGE
+
+                                        try:
+                                            bigpack[itemnum][0]
+                                        except:
+                                            continue
+
                                         if random.randint(1,4) != 1:
                                             ###INCREASE
                                             fertilityIndex = society.popadd(bigpack[itemnum][0],fertilityIndex,True)
@@ -1640,13 +1798,13 @@ while True:
                                             for num in range(random.randint(1,10)):
                                                 if posSpawnCoords:
                                                     bigpack[itemnum],posSpawnCoords = societygen.expand(bigpack[itemnum],posSpawnCoords,seaCoords)
-                                            newsstuff.append("expand")
+                                            newsstuff.append(["expand","nothin"])
                                         if turnchoice == "other":
                                             ### Smallchance events
                                             ### Rebelion
                                             civgot = other.findbordercountries(bigpack[itemnum],bigpack)
-                                            whathappens = random.randint(1,30)
-                                            if whathappens ==1 or whathappens ==2:
+                                            whathappens = random.randint(1,60)
+                                            if whathappens == 1 or whathappens == 2:
                                                 area = other.findarea(bigpack[itemnum][0])
                                                 #print("attempted rev")
                                                 if bigpack[itemnum][8] not in area:
@@ -1661,50 +1819,76 @@ while True:
                                                     landchanged=False
                                                     while landchanged==False:
                                                         for tile in bigpack[itemnum][0]:
-                                                            if (tile[0]+16,tile[1]) not in bigpack[itemnum][0] and (tile[0]-16,tile[1]) not in bigpack[itemnum][0] and (tile[0],tile[1]+16) not in bigpack[itemnum][0] and (tile[0],tile[1]-16) not in bigpack[itemnum][0]:
-                                                                ## if tile isnt in the avalable tiles north south east and west
-                                                                if (tile[0]+16,tile[1]) not in posSpawnCoords and (tile[0]-16,tile[1]) not in posSpawnCoords and (tile[0],tile[1]+16) not in posSpawnCoords and (tile[0],tile[1]-16) not in posSpawnCoords:
-                                                                    bigpack[itemnum][0].remove(tile)
-                                                                    posSpawnCoords.add(tile)
-                                                                    for i in bigpack:
-                                                                        if tile in posSpawnCoords:
-                                                                            if (tile[0]+16,tile[1]) in i[0]:
-                                                                                 i[0].append(tile)
-                                                                                 posSpawnCoords.remove(tile)
-                                                                                 landchanged=True
-
-                                                                            elif (tile[0]-16,tile[1]) in i[0]:
-                                                                                 i[0].append(tile)
-                                                                                 posSpawnCoords.remove(tile)
-                                                                                 landchanged=True
-                                                                            elif (tile[0],tile[1]+16) in i[0]:
-                                                                                 i[0].append(tile)
-                                                                                 posSpawnCoords.remove(tile)
-                                                                                 landchanged=True
-                                                                            elif (tile[0],tile[1]-16) in i[0]:
-                                                                                 i[0].append(tile)
-                                                                                 posSpawnCoords.remove(tile)
-                                                                                 landchanged=True
-                                                        landchanged=True
-
-                                            if civgot != "false":
-
-                                                if whathappens == 3 and len(bigpack[itemnum][0]) <= random.randint(50,100) and len(bigpack[civgot][0]) <= random.randint(50,100):
-                                                    deleteevents.append([civgot,itemnum,"merge"])
+                                                            if tile != bigpack[itemnum][8]:
+                                                                if (tile[0]+16,tile[1]) not in bigpack[itemnum][0] and (tile[0]-16,tile[1]) not in bigpack[itemnum][0] and (tile[0],tile[1]+16) not in bigpack[itemnum][0] and (tile[0],tile[1]-16) not in bigpack[itemnum][0]:
+                                                                    ## if tile isnt in the avalable tiles north south east and west
+                                                                    if (tile[0]+16,tile[1]) not in posSpawnCoords and (tile[0]-16,tile[1]) not in posSpawnCoords and (tile[0],tile[1]+16) not in posSpawnCoords and (tile[0],tile[1]-16) not in posSpawnCoords:
+                                                                        bigpack[itemnum][0].remove(tile)
+                                                                        posSpawnCoords.add(tile)
+                                                                        ### AWFUL CODE, NEEDS TO BE REDONE AT SOME POINT
+                                                                        ###IT VALUES EAST OVER EVERYTHING, NEED TO MAKE RANDOM
+                                                                        for i in bigpack:
+                                                                            if tile in posSpawnCoords:
+                                                                                if (tile[0]+16,tile[1]) in i[0]:
+                                                                                     i[0].append(tile)
+                                                                                     posSpawnCoords.remove(tile)
+                                                                                     landchanged=True
+                                                                                elif (tile[0]-16,tile[1]) in i[0]:
+                                                                                     i[0].append(tile)
+                                                                                     posSpawnCoords.remove(tile)
+                                                                                     landchanged=True
+                                                                                elif (tile[0],tile[1]+16) in i[0]:
+                                                                                     i[0].append(tile)
+                                                                                     posSpawnCoords.remove(tile)
+                                                                                     landchanged=True
+                                                                                elif (tile[0],tile[1]-16) in i[0]:
+                                                                                     i[0].append(tile)
+                                                                                     posSpawnCoords.remove(tile)
+                                                                                     landchanged=True
+                                                            landchanged=True
+                                            if whathappens == 3:
+                                                if civgot != "false":
+                                                    if len(bigpack[itemnum][0]) <= random.randint(50,100) and len(bigpack[civgot][0]) <= random.randint(50,100):
+                                                        deleteevents.append([civgot,itemnum,"merge"])
+                                            if whathappens == 4 or whathappens == 5 or whathappens == 6:
+                                                if civgot != "false":
+                                                    #if they are not against any country
+                                                    if bigpack[itemnum][11][0]==-1 and bigpack[civgot][11][0]==-1:
+                                                        warlength=random.randint(3,10)
+                                                        #how long the war will be
+                                                        bigpack[itemnum][11][1] = warlength
+                                                        bigpack[civgot][11][1] = warlength
+                                                        #who they are vsing
+                                                        bigpack[itemnum][11][0] = civgot
+                                                        bigpack[civgot][11][0] = itemnum
+                                                        #warturn(bigpack,itemnum,civgot)
+                                                        #def warturn(bigpack,civ1,civ2):
+                                                        #print(bigpack[itemnum][11],"ebic")
+                                                        #print(bigpack[civgot][11],"loser")
+                                                        #bigpack[itemnum][1] = (0,0,0)
+                                                        #bigpack[civgot][1] = (0,0,0)
 
 
                                             else:
                                                 newsstuff.append("nothing")
+                                            #war = [with who,turns since started,win battle chance (use randint),has taken turn yet]  11
                                         if turnchoice == "colonize":
 
                                             if posCoastCoords:
-                                                newsstuff.append("colonize")
+                                                newsstuff.append(["colonize","nothin"])
                                                 bigpack[itemnum],posCoastCoords = societygen.colonize(bigpack[itemnum],posCoastCoords,seaCoords)
                                             else:
                                                 turnchoice = "consolidate"
                                         if turnchoice == "consolidate":
-                                            newsstuff.append("consolidation")
+                                            newsstuff.append(["consolidation","nothin"])
 
+                                        bigpack = other.warturn(bigpack,itemnum)
+                                        if bigpack[itemnum][8] in bigpack[itemnum][0]:
+                                            pass
+                                        else:
+                                            print("Capital lost add effect l8r")
+                                            if bigpack[itemnum][0]:
+                                                bigpack[itemnum][8] = random.choice(bigpack[itemnum][0])
                                         for item in bigpack:
                                             for tile in item[0]:
 
@@ -1744,7 +1928,10 @@ while True:
                                                         with open("TextFiles/cities.txt","r") as file:
                                                             for line in file:
                                                                 allcities.append(line.rstrip("\n"))
-                                                        cities[spawntile] = random.choice(allcities)
+                                                        #cities[spawntile] = random.choice(allcities)
+                                                        bigpack[itemnum][10][newCity] = random.choice(allcities)
+
+                                                    newsstuff.append(["cityfounded",newCity])
 
                                         for object in newsstuff:
                                             if object!= "nothing":
@@ -1776,7 +1963,7 @@ while True:
                                             else:
                                                 newdatapack[3] = bigpack[itemnum][3]
                                         newdatapack[0] = bigpack[civgot][0] + bigpack[itemnum][0]
-                                        newdatapack[6] = bigpack[civgot][6] + bigpack[itemnum][6]
+                                        #newdatapack[6] = bigpack[civgot][6] + bigpack[itemnum][6]
                                         newdatapack[8] = bigpack[civgot][8]
                                         newdatapack[10].update(bigpack[civgot][10])
                                         newdatapack[10].update(bigpack[itemnum][10])
@@ -1900,7 +2087,7 @@ while True:
                 render = size17.render(section, True, textcolor)
                 win.blit(render,(32,amount))
             for event in game.event.get():
-                if event.type == game.MOUSEBUTTONDOWN:
+                if event.type == game.MOUSEBUTTONDOWN and event.button == LEFT:
                     if bignewsarrow1.get_rect(top=512,left=544).collidepoint(game.mouse.get_pos()):
                         Iconmus.play()
                         if isnews==True:
@@ -1993,7 +2180,7 @@ while True:
                     endGame = True
                     worldGameState = False
                     tribeGameScreen= False
-                if event.type == game.MOUSEBUTTONDOWN:
+                if event.type == game.MOUSEBUTTONDOWN and event.button == LEFT:
                     if bigearth.get_rect(top=624,left=624).collidepoint(game.mouse.get_pos()):
                         Iconmus.play()
                         mainGameScreen=True
@@ -2102,7 +2289,7 @@ while True:
                     for i in posSpawnCoords:
                         if ((i[0]-16,i[1])) in seaCoords or ((i[0]+16,i[1])) in seaCoords or ((i[0],i[1]-16)) in seaCoords or ((i[0],i[1]+16)) in seaCoords:
                             posCoastCoords.add(i)
-            if event.type == game.MOUSEBUTTONDOWN:
+            if event.type == game.MOUSEBUTTONDOWN and event.button == LEFT:
                 if biggrass.get_rect(top=672,left=16).collidepoint(game.mouse.get_pos()):inHand = grass
                 if biggrass.get_rect(top=672,left=96).collidepoint(game.mouse.get_pos()):inHand = sand
                 if biggrass.get_rect(top=672,left=176).collidepoint(game.mouse.get_pos()):inHand = snow
