@@ -93,6 +93,7 @@ ipython_config.py
 # .python-version
 env/
 bin/
+include/
 pyvenv.cfg
 
 # pipenv
