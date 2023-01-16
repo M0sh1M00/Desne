@@ -5,9 +5,7 @@ with contextlib.redirect_stdout(None):
 import random
 import News
 import pickle
-import time
 from ast import literal_eval
-from itertools import chain
 
 LEFT = 1
 RIGHT = 3
